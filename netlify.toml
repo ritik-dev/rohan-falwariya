@@ -1,0 +1,26 @@
+# Netlify build config — https://app.netlify.com/projects/rohan-falwariya
+#
+# Netlify runs `node build.mjs`, which regenerates index.html from src/page.html
+# and assembles _site/. Only _site/ is served: src/, reference/ (Rohan's deck
+# PDF), prompts/ and chats.md stay in the repo and off the public web.
+
+[build]
+  command = "node build.mjs"
+  publish = "_site"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Fonts and the board image are content-stable and versioned by the build.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The page itself must always revalidate, or a deploy takes an hour to show up.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

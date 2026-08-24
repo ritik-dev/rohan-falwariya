@@ -1,0 +1,8 @@
+# Vendored Claude skills — not this project's code, just noise in the graph
+.claude/
+_to_delete/
+dist/
+index.html
+graphify-out/
+assets/
+reference/rohan-deck.pdf
