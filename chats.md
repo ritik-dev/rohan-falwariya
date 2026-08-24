@@ -186,9 +186,63 @@ dark, plus `prefers-reduced-motion` and device emulation. It was already good �
 floor 4.90 (dark) / 5.02 (light). The touch-target and hover-latch fixes above
 are the only responsiveness changes that were actually warranted.
 
+---
+
+## Session 3 — deployment pipeline, 24 Aug 2026
+
+Goal: stop deploying by hand. Code -> commit -> push -> live.
+
+**Result: https://rohanfalwariya.com** is live on HTTPS, fed by
+`github.com/ritik-dev/rohan-falwariya`, deploying on every push.
+
+### What went in
+
+- **GitHub**: repo created public on `ritik-dev` (the `gh` CLI was signed in as
+  `deo-delhi` — wrong account — and had to be re-authed first).
+- **`netlify.toml`**: build `node build.mjs`, publish `_site`, Node 20, immutable
+  caching on `/assets/*`, must-revalidate on `/`.
+- **`build.mjs` now emits `_site/`** — `index.html` + `assets/` and nothing else.
+- **DNS**: Netlify DNS, nameservers delegated to `dns[1-4].p01.nsone.net`.
+  Verified end to end: apex 200, `http` 301 to https, `www` 301 to apex, HSTS on,
+  6/6 fonts loaded, zero console errors on the production domain.
+
+### The `_site/` decision, and why it matters
+
+Ritik chose a **public** repo with everything committed, including
+`reference/rohan-deck.pdf`, `chats.md` and `prompts/`. Publishing the repo root
+would have served all of that to anyone who guessed a URL. Netlify publishes
+`_site/` only. Confirmed in production — `src/page.html`, `chats.md`,
+`reference/rohan-deck.pdf`, `prompts/` and `netlify.toml` all return 404.
+
+**If the publish dir ever changes, re-run that 404 check.** It is the only thing
+standing between a public repo and a public deck.
+
+### Connectors, and a trap worth remembering
+
+`.mcp.json` holds **Netlify** and **Namecheap**, both OAuth, both project scope.
+
+Project scope is not a style choice — **local scope silently disappears.** A live
+Claude Code session owns `~/.claude.json` and writes its own copy back over
+anything `claude mcp add -s local` does mid-session. `.mcp.json` is a separate
+file and survives. Project-scope servers are read at **startup only**, so a new
+one needs a Claude Code restart before `/mcp` will show it.
+
+### Domain: what was rejected
+
+Namecheap URL forwarding was considered and dropped. Unmasked forwarding leaves
+`rohan-falwariya.netlify.app` in the address bar; masked forwarding keeps the
+domain but serves the site inside a hidden iframe, which breaks the HTTPS
+padlock, deep links, SEO and link previews. DNS delegation gives a real
+certificate on the real domain instead.
+
+The Namecheap API was also considered for programmatic DNS and dropped: it gates
+production access behind 20+ domains / $50 balance / $50 spent in 2 years, and
+whitelists by IPv4 — which breaks every time a residential IP rotates. Neither
+the Netlify nor the Namecheap MCP exposes DNS tools, so DNS stays a UI job.
+
 ## Where things stand / what's next
 
-- [ ] Point a domain at it (any static host — it's one folder).
+- [x] ~~Point a domain at it~~ — live at **https://rohanfalwariya.com**, Netlify DNS, auto-deploying from `main`.
 - [ ] Fix the email typo in the source PDF.
 - [ ] Consider swapping the "Results (ROAS)" folder for 2–3 real screenshots
       embedded on the page — a client shouldn't have to click into Drive to see
@@ -199,5 +253,8 @@ are the only responsiveness changes that were actually warranted.
       for why its output is thin on a single-file site.
 - [ ] Set an LLM API key if you want graphify to index the `.md` files
       semantically rather than code-only.
+- [ ] Namecheap MCP is in `.mcp.json` but was never authenticated — it kept
+      failing the OAuth callback. Not blocking anything: DNS is delegated to
+      Netlify and needs no further Namecheap involvement.
 - [ ] The reveal sweep and hero gating are covered by no test. If this ever grows,
       a small Playwright check at the six widths would lock them in.

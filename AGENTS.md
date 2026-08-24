@@ -39,8 +39,48 @@ Edit `src/page.html` and re-run the build.
 
 ## Deploy
 
-Any static host. Drag the folder into Netlify/Vercel/Cloudflare Pages, or push to
-a `gh-pages` branch. There is no server side.
+**Live: https://rohanfalwariya.com** — continuous deployment, no manual step.
+
+```
+edit src/page.html  ->  node build.mjs  ->  git commit  ->  git push  ->  live in ~1 min
+```
+
+| Piece | Value |
+|---|---|
+| Repo | `github.com/ritik-dev/rohan-falwariya` (public, branch `main`) |
+| Netlify project | `rohan-falwariya` · site id `0a2abe11-d343-4c94-861c-79b150fb658b` |
+| Build command | `node build.mjs` (from `netlify.toml`, which overrides the UI) |
+| Publish dir | `_site/` |
+| DNS | Netlify DNS — nameservers delegated to `dns[1-4].p01.nsone.net` |
+| Certificate | Let's Encrypt, auto-renewed. HSTS on, `http` and `www` both 301 to apex |
+
+**`_site/` is why source files are not on the public web.** The repo is public, but
+Netlify serves only `_site/` — `index.html` plus `assets/`. Publishing the repo
+root instead would put `src/`, `chats.md`, `prompts/` and `reference/rohan-deck.pdf`
+one guessed URL away. Verified: those paths all return 404 in production.
+
+If you ever change the publish dir, re-check that:
+
+```bash
+for u in src/page.html chats.md reference/rohan-deck.pdf; do
+  curl -s -o /dev/null -w "$u %{http_code}
+" "https://rohanfalwariya.com/$u"
+done   # every one must be 404
+```
+
+### Connectors
+
+`.mcp.json` carries the **Netlify** MCP (`netlify-mcp.netlify.app/mcp`) and
+**Namecheap** (`mcp.namecheap.com/mcp`), both OAuth, both project scope.
+
+Project scope is deliberate — **local scope does not survive.** A running Claude
+Code session owns `~/.claude.json` and flushes its own copy over anything
+`claude mcp add` writes mid-session; `.mcp.json` is a separate file, so it
+sticks. New project-scope servers are only read at **startup**, so adding one
+means restarting Claude Code before it appears in `/mcp`.
+
+Neither connector manages DNS — the Netlify MCP covers projects, deploys,
+extensions, teams and env vars only. DNS changes are done in the Netlify UI.
 
 ## House rules
 
