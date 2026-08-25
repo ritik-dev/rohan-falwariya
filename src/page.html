@@ -819,8 +819,12 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   font-size:calc(clamp(26px,3.6vw,56px) * var(--s,1));
 }
 .collage__names span{ display:inline-block; transition:color .35s var(--ease), transform .5s var(--expo); }
+/* Each name lifts into its own brand colour, read off that brand's site. The
+   three we could not identify fall back to the accent, so nothing looks broken.
+   Both sets clear 3:1 on their paper — these are large display names. */
 @media (hover:hover) and (pointer:fine){
-  .collage__names li:hover span{ color:var(--accent); transform:translateY(-3px); }
+  .collage__names li:hover span{ color:var(--bc,var(--accent)); transform:translateY(-3px); }
+  :root[data-theme="dark"] .collage__names li:hover span{ color:var(--bcd,var(--accent)); }
 }
 .collage__more{
   margin:clamp(20px,2.6vw,34px) 0 0; font-family:var(--f-mono);
@@ -1072,13 +1076,13 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           <img src="assets/work/averon-second-date-bed.webp" alt="" loading="lazy" decoding="async" width="240" height="300">
         </div>
         <ul class="collage__names">
-          <li style="--s:1.0"><span>Taos</span></li>
-          <li style="--s:0.86"><span>Dose</span></li>
+          <li style="--s:1.0;--bc:#C46142;--bcd:#D98565"><span>Taos</span></li>
+          <li style="--s:0.86;--bc:#57665C;--bcd:#8FA697"><span>Dose</span></li>
           <li style="--s:1.14"><span>Royal Canadian</span></li>
-          <li style="--s:0.92"><span>Southwind Apparel</span></li>
+          <li style="--s:0.92;--bc:#093165;--bcd:#4A7FC1"><span>Southwind Apparel</span></li>
           <li style="--s:1.06"><span>Motion</span></li>
-          <li style="--s:0.9"><span>Serenity Studio</span></li>
-          <li style="--s:1.1"><span>FabuLove</span></li>
+          <li style="--s:0.9;--bc:#8B6F60;--bcd:#C0A892"><span>Serenity Studio</span></li>
+          <li style="--s:1.1;--bc:#A02447;--bcd:#E0577E"><span>FabuLove</span></li>
           <li style="--s:0.88"><span>Cloudly Footwear</span></li>
         </ul>
         <p class="collage__more">&amp; agencies, UGC creators, dropshippers, spa &amp; studio owners</p>
