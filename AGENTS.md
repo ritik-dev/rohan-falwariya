@@ -21,10 +21,12 @@ node build.mjs        # the only command. Node 18+. No npm install needed.
 `<style>`, the markup and the `<script>` — with no document wrapper — plus two
 tokens the build replaces:
 
-| Token          | index.html                | dist/*.html            |
-|----------------|---------------------------|------------------------|
-| `__FONTFACE__` | `url(assets/fonts/…)`     | base64 data URIs       |
-| `__BOARD__`    | `assets/board.jpg`        | base64 data URI        |
+| Token / path            | index.html            | dist/*.html            |
+|-------------------------|-----------------------|------------------------|
+| `__FONTFACE__`          | `url(assets/fonts/…)` | base64 data URIs       |
+| `assets/work/*.webp`    | linked                | base64 data URIs       |
+| `assets/reel/*.webp`    | linked                | base64 data URIs       |
+| `assets/reel/*.mp4`     | linked                | **left linked** — inlining megabytes of video would defeat an emailable file, so offline the poster frames stand in |
 
 Outputs:
 
@@ -127,14 +129,21 @@ Two JS helpers do the heavy lifting:
   from the reference specs. Under-damped on purpose — the small overshoot on
   release is the whole point.
 
-Two things that are easy to get wrong and are already handled — don't undo them:
+Three things that are easy to get wrong and are already handled — don't undo them:
 
 1. **The hero is gated on the loader, not on scroll.** Its bottom rows sit below
    the observer's `-10%` margin at load, so IO never fires for them. `go()` adds
    `.in` to every `.gate` element right after `is-ready`, and gated elements are
    filtered *out* of the observer's target list so they can't reveal early,
    behind the curtain.
-2. **IntersectionObserver only reports state *changes*.** Anything that goes from
+2. **A target that clips itself to nothing can never reveal itself.**
+   IntersectionObserver measures the element's *clipped* box. `.wipe` starts at
+   `clip-path:inset(0 100% 0 0)` — zero area — so its ratio is always 0 and a
+   `threshold: 0.1` observer never fires. This silently hid the script board on
+   every screen size for the whole of the site's first life. `.wipe` targets get
+   their own `threshold: 0` observer (`ioClip`); keep it that way for any future
+   primitive that hides by clipping rather than by opacity.
+3. **IntersectionObserver only reports state *changes*.** Anything that goes from
    below the fold to above it without ever intersecting — restored scroll offset,
    anchor jump, hard flick — never fires and would stay invisible forever.
    `sweepPast()` catches those, and only runs after a jump bigger than one
@@ -212,7 +221,11 @@ src/page.html                 source of truth (edit this)
 build.mjs                     the build
 index.html                    generated
 dist/                         generated
-assets/board.jpg              Rohan's script-writing board, from his deck
+assets/work/*.webp            selected statics + the collage bed (240px `-bed` variants)
+assets/reel/*.mp4|webp        6s silent motion previews + poster frames
+assets/board.jpg              Rohan's script-writing board — UNUSED since the
+                              "Every ad gets logged" section was cut; kept in the
+                              repo in case that section ever comes back
 assets/fonts/*.woff2          Instrument Serif/Sans + IBM Plex Mono, self-hosted
 reference/deck-raw.txt        text extracted from the original PDF
 reference/design-notes.md     palette, type scale, motion spec, section map
@@ -222,3 +235,45 @@ reference/prompts/            the two reference site specs the motion came from
 graphify-out/                 generated knowledge graph (gitignored)
 chats.md                      full session log — read this to pick up where we left off
 ```
+
+
+## What changed in the Aug 2026 pass
+
+Rohan reviewed the live site and sent marked-up notes
+(`files/Copy of Rohan — Creative Strategist & Ad Editor.pdf`). Applied:
+
+* **New section order** (his "NEW FORMAT"): `01` angle/script/edit/statics →
+  `02` who it's been for → `03` the work → `04` and then (results + what clients
+  said) → `05` stuff I do → `06` wanna work together. The driving note was
+  *"logo ko jayda scroll na krna pade"* — this is an ad strategist's site, all
+  the information, without a long scroll. **Weigh any addition against that.**
+* **Hero line widened** to "I make the whole [SLOT] ad for DTC brands." The old
+  "I make [SLOT] ads" contradicted the seven services listed later and, in his
+  words, boxed him into the cheapest thing he does.
+* **Deleted:** the "Every ad gets logged" section (script board + tracker table)
+  and the giant `FALWARIYA` wordmark, plus all their CSS and JS.
+* **Stats:** `2` → `2+` years, and the "languages worked in" *counter* is gone —
+  he wants the capability stated without a number, so it sits in the hero lede.
+* **Folders 5 → 3.** Results and "nice things clients said" moved out of the row
+  list into the `04` two-up so neither costs a scroll.
+* **"Who it's been for"** is a collage, not a name list: names in display serif
+  over real creative blurred right down under a paper scrim. "agencies" →
+  "dropshippers" per his note.
+* **Light is the default theme**, with a toggle in the nav (half-filled disc, not
+  a stock sun/moon) resolved before first paint from `localStorage`.
+* **The nav has a frosted panel** — without it the wordmark and clock sat
+  unreadably on the hero headline. Use `saturate(<1)`: boosting saturation turned
+  the accent chip passing behind the bar into a solid salmon block.
+
+### Client work on the page
+
+Statics and clips are pulled from Rohan's public Drive folders (the connector
+cannot list link-shared folders — parse the folder HTML for `data-id` rows).
+**Curate, never dump:** check each asset's mean colour against the warm-bone
+palette and drop what fights it. **Never print raw Drive filenames** — several
+encode crude ad hooks.
+
+Open item: the named client list (Taos, Dose, Royal Canadian, Southwind, Motion,
+Serenity Studio, FabuLove, Cloudly) and the brands in the creative (Selian
+Health, Averon, Norvia, Sweatset, Serenity Studio) only overlap on Serenity
+Studio. Captions therefore name only the brand visible *in the ad itself*.

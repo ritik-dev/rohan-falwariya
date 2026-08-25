@@ -19,10 +19,16 @@
    ============================================================== */
 
 :root{
+  color-scheme:light;
   --paper:#EFEAE1; --paper-2:#E6E0D5; --paper-3:#DCD5C8;
   --ink:#17140F; --ink-2:#4A443A; --ink-3:#6B6252;
   --rule:#C9C1B2; --ghost:#DBD3C4;
   --accent:#A73D18; --accent-lo:#F0DDD3;
+
+  /* Format hues. One muted colour per kind of work — used only on the work
+     rows, the format kickers and the niche chips, never on body copy. Kept
+     desaturated so the burnt-sienna accent stays the loudest thing here. */
+  --c-ai:#A992D4; --c-ugc:#DDA95C; --c-static:#8AAAD4; --c-res:#B3C36A; --c-said:#6FB9A6;
 
   --night:#14110C; --night-2:#1E1A13; --night-ink:#EDE6D8;
   --night-ink2:#9A9184; --night-rule:#332D23; --night-acc:#E4693B;
@@ -46,6 +52,7 @@
 
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
+    color-scheme:dark;
     --paper:#14110C; --paper-2:#1C1811; --paper-3:#241F17;
     --ink:#EFE8DA; --ink-2:#B2A996; --ink-3:#8A8172;
     --rule:#322C22; --ghost:#241F17;
@@ -54,6 +61,7 @@
   }
 }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --paper:#14110C; --paper-2:#1C1811; --paper-3:#241F17;
   --ink:#EFE8DA; --ink-2:#B2A996; --ink-3:#8A8172;
   --rule:#322C22; --ghost:#241F17;
@@ -161,6 +169,41 @@ html.is-ready .loader{ transform:translateY(-105%); }
   padding:18px calc(var(--gut) + var(--inset)) 18px calc(var(--rail) + 8px);
   transition:transform .5s var(--expo), color .4s var(--ease);
 }
+/* Frosted panel behind the bar. Without it the wordmark and the clock sit
+   directly on the hero headline and both become unreadable. The gradient and
+   the mask both fade downward so the panel has no hard bottom edge — it
+   dissolves into the page instead of drawing a line across it. */
+.nav::before{
+  content:""; position:absolute; inset:-1px 0 -26px 0; z-index:-1; pointer-events:none;
+  background:linear-gradient(to bottom,
+    color-mix(in oklab, var(--paper) 94%, transparent) 0%,
+    color-mix(in oklab, var(--paper) 74%, transparent) 52%,
+    color-mix(in oklab, var(--paper) 30%, transparent) 78%,
+    transparent 100%);
+  /* blur only — saturate() pushed the accent chip behind the bar into a solid
+     salmon block. Desaturating instead keeps whatever passes under it quiet. */
+  -webkit-backdrop-filter:blur(20px) saturate(.72);
+  backdrop-filter:blur(20px) saturate(.72);
+  -webkit-mask-image:linear-gradient(to bottom, #000 0%, #000 46%, transparent 100%);
+  mask-image:linear-gradient(to bottom, #000 0%, #000 46%, transparent 100%);
+  transition:background .45s var(--ease);
+}
+/* over the dark work band the panel has to tint the other way */
+.nav.on-night::before{
+  background:linear-gradient(to bottom,
+    color-mix(in oklab, var(--night) 95%, transparent) 0%,
+    color-mix(in oklab, var(--night) 76%, transparent) 52%,
+    color-mix(in oklab, var(--night) 32%, transparent) 78%,
+    transparent 100%);
+}
+/* no backdrop-filter (older Firefox): lean on the gradient alone, opaque enough
+   to keep the text legible without the blur doing any of the work */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .nav::before{ background:linear-gradient(to bottom,
+    var(--paper) 0%, color-mix(in oklab, var(--paper) 72%, transparent) 62%, transparent 100%); }
+  .nav.on-night::before{ background:linear-gradient(to bottom,
+    var(--night) 0%, color-mix(in oklab, var(--night) 76%, transparent) 62%, transparent 100%); }
+}
 @media (max-width:1024px){ .nav{ padding-left:calc(var(--gut) + var(--inset)); } }
 .nav.is-hidden{ transform:translateY(-110%); }
 .nav.on-night{ color:var(--night-ink); }
@@ -214,6 +257,33 @@ html.is-ready .loader{ transform:translateY(-105%); }
   .burger:hover{ background:var(--accent); border-color:var(--accent); color:var(--paper); }
   .burger:hover i:first-child{ transform:translateY(1px); }
   .burger:hover i:last-child{ transform:translateY(-1px); }
+}
+
+/* ---------------- theme toggle ---------------- */
+/* Same 42px disc as the burger so the two read as a pair. Both icons occupy
+   the same grid cell and cross-fade, so the button never changes size. */
+.themer{
+  width:42px; height:42px; border:1px solid currentColor; border-radius:50%;
+  display:grid; place-content:center; flex:none; color:inherit;
+  transition:background-color .4s var(--ease), color .4s var(--ease), border-color .4s var(--ease);
+}
+/* A disc that is half ink, half paper, and swings the fill across on the house
+   easing — the same circular vocabulary as the burger and the row arrows. */
+.themer__disc{
+  width:15px; height:15px; border-radius:50%; border:1.3px solid currentColor;
+  position:relative; overflow:hidden; display:block;
+}
+.themer__disc::after{
+  content:""; position:absolute; inset:-1px; border-radius:50%;
+  background:currentColor; transform:translateX(-52%);
+  transition:transform .6s var(--drama);
+}
+:root[data-theme="dark"] .themer__disc::after{ transform:translateX(52%); }
+@media (hover:hover) and (pointer:fine){
+  .themer:hover{ background:var(--accent); border-color:var(--accent); color:var(--paper); }
+}
+@media (prefers-reduced-motion:reduce){
+  .themer__disc::after{ transition:transform .01ms; }
 }
 
 /* ---------------- menu overlay ---------------- */
@@ -358,7 +428,9 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 .slot{
   display:inline-flex; align-items:center; justify-content:center; gap:.6em;
   font-family:var(--f-mono); font-style:normal; font-weight:500;
-  font-size:max(9.5px,.115em); letter-spacing:.11em; text-transform:uppercase;
+  /* .115em of the h1 — but the h1 bottoms out at 50px on a phone, which would
+     put the one accent element in the hero at 9.5px. Floor it at 11px. */
+  font-size:max(11px,.115em); letter-spacing:.11em; text-transform:uppercase;
   height:2.9em; min-width:7.6em; padding:0 .9em;
   background:var(--accent); color:var(--paper);
   vertical-align:1.55em; margin-right:.55em; border-radius:2px; overflow:hidden;
@@ -399,14 +471,15 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   .btn--fill:hover svg{ transform:translateY(4px); }
 }
 
-.stats{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border-top:1px solid var(--rule); margin-top:clamp(24px,3.2vw,46px); }
+.stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:1px solid var(--rule); margin-top:clamp(24px,3.2vw,46px); }
 @media (max-width:700px){ .stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .stat{ padding:18px 16px 4px 0; border-right:1px solid var(--rule); }
 .stat:last-child{ border-right:0; }
 @media (max-width:700px){
+  /* three tiles, two up then one: the second ends its row, the third spans */
   .stat:nth-child(2){ border-right:0; }
   .stat:nth-child(-n+2){ border-bottom:1px solid var(--rule); padding-bottom:16px; }
-  .stat:nth-child(n+3){ padding-top:16px; }
+  .stat:nth-child(3){ padding-top:16px; grid-column:1 / -1; border-right:0; }
 }
 .stat__n{ font-family:var(--f-disp); font-size:clamp(30px,3.5vw,54px); line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
 .stat__n sup{ font-size:.42em; vertical-align:super; color:var(--accent); }
@@ -475,12 +548,160 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   .row:hover .row__t{ transform:translateX(12px); color:var(--accent); }
   .row:hover .row__go{ opacity:1; background:var(--accent); border-color:var(--accent); color:var(--paper); transform:translateX(8px); }
 }
+
+/* One muted hue per kind of work. Only inside the night band, where the
+   background is dark in both themes, so these five stay above 4.5:1 without
+   needing a light-mode variant. Index, kicker and hover arrow only — the
+   headline still goes burnt sienna, so the accent keeps the loudest note. */
+.row[data-fmt]{ --fmt:var(--night-acc); }
+.row[data-fmt="ai"]{ --fmt:var(--c-ai); }
+.row[data-fmt="ugc"]{ --fmt:var(--c-ugc); }
+.row[data-fmt="static"]{ --fmt:var(--c-static); }
+.row[data-fmt="res"]{ --fmt:var(--c-res); }
+.row[data-fmt="said"]{ --fmt:var(--c-said); }
+.row[data-fmt] .row__i,
+.row[data-fmt] .row__t small{ color:var(--fmt); }
+@media (hover:hover) and (pointer:fine){
+  .row[data-fmt]:hover .row__t{ color:var(--fmt); }
+  .row[data-fmt]:hover .row__go{
+    background:var(--fmt); border-color:var(--fmt); color:var(--night);
+  }
+}
 /* touch: no hover, so the arrow must read as reachable on its own */
 @media (hover:none),(pointer:coarse){ .row__go{ opacity:.85; } }
 @media (max-width:900px){
   .row{ grid-template-columns:40px minmax(0,1fr) 42px; }
   .row p{ grid-column:2 / span 2; padding-top:8px; }
   .row__go{ width:38px; height:38px; }
+}
+
+/* ---------------- motion sneak peek ---------------- */
+/* Three silent verticals, playing only while they are actually on screen.
+   They sit above the statics strip so the section reads motion -> stills, and
+   they stay small on purpose: the folders above are still the real archive. */
+.reel{ margin-top:clamp(54px,6.5vw,96px); }
+/* strip left, a short note right — same two-column rhythm as the board in 04,
+   so the empty half of the band carries meaning instead of nothing */
+.reel__grid{
+  display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);
+  gap:clamp(24px,4vw,72px); align-items:start;
+}
+@media (max-width:940px){ .reel__grid{ grid-template-columns:1fr; } }
+.reel__strip{
+  list-style:none; margin:0; padding:0; display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(13px,1.6vw,26px);
+}
+.reel__note{ padding-top:clamp(4px,1vw,14px); }
+.reel__note p{ margin:0; color:var(--night-ink2); font-size:14.5px; max-width:44ch; }
+.reel__meta{
+  margin-top:14px !important; font-family:var(--f-mono); font-size:10.5px;
+  letter-spacing:.16em; text-transform:uppercase; opacity:.62;
+}
+.reel__cell{
+  opacity:0; transform:translateY(20px); filter:blur(8px);
+  transition:opacity .8s var(--drama), transform .8s var(--drama), filter .8s var(--drama);
+  transition-delay:calc(var(--i) * 90ms);
+}
+.reel.in .reel__cell{ opacity:1; transform:none; filter:blur(0); }
+.reel__frame{
+  position:relative; overflow:hidden; border-radius:5px;
+  border:1px solid var(--night-rule); background:var(--night-2); isolation:isolate;
+}
+.reel__v{
+  display:block; width:100%; height:auto; aspect-ratio:9/16; object-fit:cover;
+  filter:saturate(.9) brightness(.94);
+  transition:filter .6s var(--ease), transform .8s var(--expo);
+}
+.reel__tag{
+  position:absolute; left:0; bottom:0; z-index:2;
+  font-family:var(--f-mono); font-size:11px; letter-spacing:.15em; text-transform:uppercase;
+  background:color-mix(in oklab, var(--night) 78%, transparent);
+  -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+  color:var(--night-ink2); padding:6px 9px; opacity:.9;
+}
+.reel__cap{
+  margin:11px 0 0; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--night-ink2);
+}
+.reel__cap b{ display:block; color:var(--night-ink); font-weight:500; }
+.reel__cap span{ opacity:.72; }
+@media (hover:hover) and (pointer:fine){
+  .reel__cell:hover .reel__v{ filter:none; transform:scale(1.03); }
+}
+@media (max-width:640px){
+  .reel__strip{ max-width:none; gap:10px; }
+  .reel__tag{ font-size:11px; padding:5px 7px; }
+  .reel__cap{ font-size:10px; letter-spacing:.1em; }
+}
+@media (prefers-reduced-motion:reduce){
+  .reel__cell{ opacity:1; transform:none; filter:none; transition:none; }
+}
+
+/* ---------------- selected statics: contact strip ---------------- */
+/* A contact sheet, not a gallery grid. Every frame keeps its real aspect ratio
+   (4:5 and 9:16 both appear), the strip runs off the right edge so it reads as
+   a longer roll, and the frames sit back — desaturated and dimmed — until you
+   actually look at one. Nothing here competes with the headline. */
+.sheet{ margin-top:clamp(58px,7vw,106px); }
+.sheet__top{
+  display:flex; justify-content:space-between; align-items:baseline; gap:20px;
+  border-top:1px solid var(--night-rule); padding-top:15px;
+  margin-bottom:clamp(22px,2.8vw,36px);
+}
+.sheet__k,.sheet__hint{
+  margin:0; font-family:var(--f-mono); font-size:11px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--night-ink2);
+}
+.sheet__hint{ display:inline-flex; align-items:center; gap:9px; opacity:.75; }
+.sheet__hint svg{ width:15px; height:15px; animation:nudge 2.6s var(--ease) infinite; }
+@keyframes nudge{ 0%,62%,100%{ transform:none; } 78%{ transform:translateX(5px); } }
+
+.sheet__scroll{
+  overflow-x:auto; overflow-y:hidden; scroll-snap-type:x proximity;
+  scrollbar-width:none; -ms-overflow-style:none;
+  /* bleed to the page edge so the roll runs out of frame instead of stopping */
+  margin-inline:calc(var(--gut) * -1); padding-inline:var(--gut);
+}
+.sheet__scroll::-webkit-scrollbar{ display:none; }
+.sheet__scroll:focus-visible{ outline:2px solid var(--night-acc); outline-offset:6px; }
+.sheet__strip{
+  list-style:none; margin:0; padding:2px 0 6px; display:flex; align-items:flex-start;
+  gap:clamp(13px,1.5vw,24px); width:max-content;
+}
+.cell{
+  scroll-snap-align:center; flex:none;
+  /* every other frame drops, so the roll reads as a laid-out sheet not a row */
+  margin-top:0;
+  opacity:0; transform:translateY(20px); filter:blur(8px);
+  transition:opacity .8s var(--drama), transform .8s var(--drama), filter .8s var(--drama);
+  transition-delay:calc(var(--i) * 70ms);
+}
+.cell:nth-child(even){ margin-top:clamp(18px,2.6vw,44px); }
+.sheet.in .cell{ opacity:1; transform:none; filter:blur(0); }
+
+.tile{ margin:0; }
+.tile img{
+  display:block; height:clamp(238px,30vw,412px); width:auto; aspect-ratio:var(--ar);
+  border:1px solid var(--night-rule); border-radius:4px; background:var(--night-2);
+  filter:grayscale(.42) brightness(.84) contrast(1.03);
+  transition:filter .65s var(--ease), transform .75s var(--expo);
+}
+.tile figcaption{
+  margin-top:12px; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--night-ink2); max-width:26ch;
+}
+.tile figcaption b{ display:block; color:var(--night-ink); font-weight:500; }
+.tile figcaption span{ opacity:.72; }
+@media (hover:hover) and (pointer:fine){
+  .tile:hover img{ filter:none; transform:translateY(-7px); }
+}
+/* touch has no hover, so don't hide the work behind one */
+@media (hover:none),(pointer:coarse){
+  .tile img{ filter:grayscale(.12) brightness(.95); }
+}
+@media (prefers-reduced-motion:reduce){
+  .cell{ opacity:1; transform:none; filter:none; transition:none; }
+  .sheet__hint svg{ animation:none; }
 }
 
 /* ---------------- night band ---------------- */
@@ -492,27 +713,36 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 @media (hover:hover) and (pointer:fine){ .night .row:hover .row__go{ color:var(--night); } }
 
 /* board */
-.board{ margin-top:clamp(46px,6vw,96px); display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2.15fr); gap:clamp(24px,4vw,64px); align-items:start; }
-@media (max-width:940px){ .board{ grid-template-columns:1fr; } }
-.board__note p{ margin:0 0 1em; color:var(--night-ink2); max-width:44ch; }
-.board__frame{ position:relative; overflow:hidden; border:1px solid var(--night-rule); background:#0B0906; border-radius:6px; margin:0; }
-.board__frame img{ width:100%; height:auto; display:block; will-change:transform; }
-.board__tag{ position:absolute; top:0; left:0; font-family:var(--f-mono); font-size:9.5px; letter-spacing:.17em; text-transform:uppercase; background:var(--night-acc); color:var(--night); padding:6px 11px; z-index:2; }
-
-/* tracker */
-.trk{ margin-top:clamp(46px,6vw,92px); }
-.trk__wrap{ overflow-x:auto; border:1px solid var(--night-rule); border-radius:6px; }
-.trk table{ width:100%; min-width:760px; border-collapse:collapse; }
-.trk th{ text-align:left; font-family:var(--f-mono); font-weight:500; font-size:9.5px; letter-spacing:.17em; text-transform:uppercase; color:#8A8172; padding:13px 16px; border-bottom:1px solid var(--night-rule); background:var(--night-2); white-space:nowrap; }
-.trk td{ padding:14px 16px; border-bottom:1px solid var(--night-rule); font-family:var(--f-mono); font-size:11.5px; color:var(--night-ink2); white-space:nowrap; font-variant-numeric:tabular-nums; }
-.trk tr:last-child td{ border-bottom:0; }
-.trk tbody tr{ transition:background-color .35s var(--ease); }
-@media (hover:hover) and (pointer:fine){
-  .trk tbody tr:hover{ background:var(--night-2); }
-  .trk tbody tr:hover td:first-child{ color:var(--night-acc); }
+/* ---------------- 04 · results + what clients said ---------------- */
+/* Both live in one row so neither costs a scroll to reach - Rohan's note was
+   explicitly "1 hi mai daal dio". They read as cards, not as more folder rows,
+   so the three folders above stay the main event. */
+.proof{
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(13px,1.6vw,24px);
 }
-.trk td b{ color:var(--night-ink); font-weight:400; }
-.trk__cap{ font-family:var(--f-mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:#8A8172; margin-top:12px; }
+@media (max-width:700px){ .proof{ grid-template-columns:1fr; } }
+.proof__card{
+  display:grid; grid-template-columns:minmax(0,1fr) 46px; align-items:start;
+  gap:14px; padding:clamp(20px,2.4vw,30px);
+  border:1px solid var(--night-rule); border-radius:6px; background:var(--night-2);
+  transition:border-color .4s var(--ease), background-color .4s var(--ease), transform .5s var(--expo);
+}
+.proof__k{
+  grid-column:1; font-family:var(--f-mono); font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--night-ink2);
+}
+.proof__k b{ color:var(--fmt,var(--night-acc)); font-weight:500; }
+.proof__t{
+  grid-column:1; font-size:14.5px; color:var(--night-ink2); max-width:34ch;
+}
+.proof__card .row__go{ grid-column:2; grid-row:1 / span 2; align-self:center; }
+@media (hover:hover) and (pointer:fine){
+  .proof__card:hover{ border-color:var(--fmt,var(--night-acc)); transform:translateY(-3px); }
+  .proof__card:hover .row__go{
+    opacity:1; background:var(--fmt,var(--night-acc)); border-color:var(--fmt,var(--night-acc)); color:var(--night);
+  }
+}
 
 .mini{ margin:clamp(38px,4.6vw,68px) 0 0; }
 .mini a{
@@ -555,6 +785,57 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 
 .mkt{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:6px; overflow:hidden; margin-top:clamp(28px,3.6vw,52px); }
 @media (max-width:640px){ .mkt{ grid-template-columns:1fr; } }
+.mkt__line{
+  margin:clamp(26px,3.2vw,44px) 0 0; max-width:62ch;
+  font-size:clamp(15px,1.25vw,19px); color:var(--ink-2);
+}
+.mkt__line b{ color:var(--ink); font-weight:500; }
+
+/* ---------------- who it's been for: collage ---------------- */
+/* The names are the artwork. Real creative sits behind them, blurred right
+   down and under a paper scrim, so it reads as texture and the names keep
+   their contrast - no logo wall, no grid of screenshots. */
+.collage{
+  position:relative; isolation:isolate; overflow:hidden;
+  margin-top:clamp(24px,3vw,42px); border:1px solid var(--rule); border-radius:8px;
+  padding:clamp(26px,4vw,58px) clamp(20px,3.4vw,52px);
+}
+.collage__bed{
+  position:absolute; inset:0; z-index:-2; display:grid;
+  grid-template-columns:repeat(6,1fr); gap:0;
+  /* fade the band out sideways so it has no hard start or finish */
+  -webkit-mask-image:linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  mask-image:linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+.collage__bed img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  /* blur bleeds transparency in at the edges of each cell and that showed up
+     as seams between the frames — scaling past the cell hides it */
+  transform:scale(1.12); filter:blur(5px) grayscale(.55) brightness(.92);
+}
+@media (max-width:700px){ .collage__bed{ grid-template-columns:repeat(3,1fr); } }
+.collage::after{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:color-mix(in oklab, var(--paper) 88%, transparent);
+}
+.collage__names{
+  list-style:none; margin:0; padding:0;
+  display:flex; flex-wrap:wrap; align-items:baseline;
+  gap:clamp(14px,2vw,34px) clamp(18px,2.6vw,44px);
+}
+.collage__names li{
+  font-family:var(--f-disp); font-weight:400; line-height:1;
+  letter-spacing:-.028em; color:var(--ink);
+  font-size:calc(clamp(26px,3.6vw,56px) * var(--s,1));
+}
+.collage__names span{ display:inline-block; transition:color .35s var(--ease), transform .5s var(--expo); }
+@media (hover:hover) and (pointer:fine){
+  .collage__names li:hover span{ color:var(--accent); transform:translateY(-3px); }
+}
+.collage__more{
+  margin:clamp(20px,2.6vw,34px) 0 0; font-family:var(--f-mono);
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+}
 .mkt div{ background:var(--paper); padding:22px 20px; }
 .mkt h4{ margin:0 0 6px; font-family:var(--f-disp); font-weight:400; font-size:clamp(20px,2.2vw,30px); letter-spacing:-.02em; }
 .mkt p{ margin:0; font-size:13.5px; color:var(--ink-2); }
@@ -578,26 +859,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 .chan__v{ font-family:var(--f-disp); font-size:clamp(21px,2.6vw,38px); line-height:1.05; letter-spacing:-.025em; word-break:break-word; }
 .chan__m{ font-size:13px; opacity:.7; }
 
-/* ---------------- giant wordmark ---------------- */
-.wordmark{
-  padding:clamp(24px,3vw,44px) var(--gut) clamp(10px,1.4vw,20px);
-  overflow:hidden; user-select:none; pointer-events:none;
-}
-.wordmark h2{
-  margin:0; font-family:var(--f-disp); font-weight:400;
-  font-size:25vw; line-height:.82; letter-spacing:-.05em;
-  text-transform:uppercase; white-space:nowrap; text-align:center;
-  color:var(--ink); opacity:.94;
-}
-.wordmark .ltr{ display:inline-block; overflow:hidden; vertical-align:bottom; line-height:.84; }
-.wordmark .ltr > i{
-  display:inline-block; font-style:normal;
-  transform:translateX(-105%); opacity:0; filter:blur(20px);
-  transition:transform 1.2s var(--drama), opacity .5s var(--drama), filter .9s var(--drama);
-  transition-delay:var(--d,0ms);
-}
-.wordmark.in .ltr > i{ transform:none; opacity:1; filter:blur(0); }
-
 /* ---------------- footer ---------------- */
 .foot{
   border-top:1px solid var(--rule); background:var(--paper);
@@ -618,10 +879,30 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     content:""; position:absolute; left:-8px; right:-8px; top:50%;
     height:40px; transform:translateY(-50%);
   }
+  /* The menu's own links are display-sized but only 39px tall at the clamp
+     floor, and they carry no overlay of their own. They sit 12px apart, so a
+     44px band clears the neighbour either side. */
+  .menu__nav a{ position:relative; }
+  .menu__nav a::before{
+    content:""; position:absolute; left:-8px; right:-8px; top:50%;
+    height:44px; transform:translateY(-50%);
+  }
+  /* the two nav discs are 42px by design; nudge to the 44px floor on touch */
+  .burger, .themer{ width:44px; height:44px; }
   /* and keep neighbouring targets from sharing an edge once those grow */
   .foot{ row-gap:22px; }
   .menu__foot{ row-gap:26px; }
   .menu__nav{ gap:12px; }
+}
+
+/* ---------------- small-screen legibility floor ---------------- */
+/* The mono labels sit at 9.5-10.5px. On a desktop that reads as a deliberate
+   editorial detail; on a phone it is simply small. Floor them at 11px below
+   640px — every one is a short uppercase label, so nothing reflows — and leave
+   the desktop sizes exactly as they were. */
+@media (max-width:640px){
+  .eyebrow, .nav__link, .stat__l, .aside__k, .row__t small,
+  .trk__cap, .chan__k, .foot small, .up, .menu__foot{ font-size:11px; }
 }
 @media (hover:hover) and (pointer:fine){
   .foot a:hover{ color:var(--accent); }
@@ -631,6 +912,18 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   .menu__x:hover{ transform:rotate(90deg); background:var(--night-acc); }
 }
 </style>
+
+<script>
+/* Theme, resolved before the first paint so the page never flashes the wrong
+   one. Light is the default. Setting data-theme="light" explicitly also
+   disables the prefers-color-scheme block (it is scoped to
+   :not([data-theme="light"])), so a stored choice always beats the OS. */
+(function () {
+  var t = 'light';
+  try { var s = localStorage.getItem('rf-theme'); if (s === 'dark' || s === 'light') t = s; } catch (e) {}
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 
 <div class="grain" aria-hidden="true"></div>
 
@@ -656,6 +949,9 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   <div class="clock"><span class="dot"></span><span id="clock">Delhi — --:-- IST</span></div>
   <div class="nav__right">
     <a class="nav__link" href="#contact" data-cur="Write">Let's talk</a>
+    <button class="themer" id="themer" type="button" aria-label="Switch to dark theme" data-cur="Theme">
+      <span class="themer__disc" aria-hidden="true"></span>
+    </button>
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false"><i></i><i></i></button>
   </div>
 </header>
@@ -670,9 +966,9 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
       </button>
     </div>
     <nav class="menu__nav">
-      <a href="#work"     style="--d:120ms"><span>01</span>Work</a>
-      <a href="#services" style="--d:190ms"><span>02</span>Services</a>
-      <a href="#clients"  style="--d:260ms"><span>03</span>Clients</a>
+      <a href="#clients"  style="--d:120ms"><span>01</span>Clients</a>
+      <a href="#work"     style="--d:190ms"><span>02</span>Work</a>
+      <a href="#services" style="--d:260ms"><span>03</span>Services</a>
       <a href="#contact"  style="--d:330ms"><span>04</span>Contact</a>
     </nav>
     <div class="menu__foot">
@@ -696,15 +992,15 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
       </div>
 
       <h1 class="gate">
-        <span class="l"><span class="rv"><i style="--d:200ms">I</i></span> <span class="rv"><i style="--d:340ms">make</i></span></span>
-        <span class="l nowrap"><span class="slot" aria-hidden="true"><i class="slot__rec"></i><span class="slot__w" id="slot"><span>UGC</span></span></span><span class="rv"><i style="--d:480ms">ads</i></span></span>
-        <span class="l"><span class="rv"><i style="--d:620ms">for</i></span> <span class="rv"><i style="--d:760ms"><em>DTC</em></i></span> <span class="rv"><i style="--d:900ms">brands.</i></span></span>
+        <span class="l"><span class="rv"><i style="--d:200ms">I</i></span> <span class="rv"><i style="--d:320ms">make</i></span> <span class="rv"><i style="--d:440ms">the</i></span> <span class="rv"><i style="--d:560ms"><em>whole</em></i></span></span>
+        <span class="l nowrap"><span class="slot" aria-hidden="true"><i class="slot__rec"></i><span class="slot__w" id="slot"><span>UGC</span></span></span><span class="rv"><i style="--d:680ms">ad</i></span></span>
+        <span class="l"><span class="rv"><i style="--d:800ms">for</i></span> <span class="rv"><i style="--d:920ms">DTC</i></span> <span class="rv"><i style="--d:1040ms">brands.</i></span></span>
       </h1>
 
       <div class="hero__bot">
         <p class="hero__lede fade gate" style="--d:1080ms">
-          Pretty much the whole thing. I figure out the angle, write the script, cut the video,
-          design the statics — then look at <b>what the numbers did</b> and make the next batch better.
+          I figure out the angle, write the script, cut the video, design the statics — then look at
+          <b>what the numbers did</b> and make the next batch better. Can work in different languages too.
         </p>
         <div class="hero__acts fade gate" style="--d:1180ms">
           <a class="btn btn--fill" href="#work" data-cur="Scroll">See the work
@@ -717,10 +1013,9 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
       </div>
 
       <div class="stats">
-        <div class="stat fade gate" style="--d:1280ms"><div class="stat__n"><span data-count="2">0</span></div><div class="stat__l">Years making ads</div></div>
+        <div class="stat fade gate" style="--d:1280ms"><div class="stat__n"><span data-count="2">0</span><sup>+</sup></div><div class="stat__l">Years making ads</div></div>
         <div class="stat fade gate" style="--d:1390ms"><div class="stat__n"><span data-count="8">0</span><sup>+</sup></div><div class="stat__l">Named brands</div></div>
         <div class="stat fade gate" style="--d:1500ms"><div class="stat__n"><span data-count="11">0</span></div><div class="stat__l">Niches shipped</div></div>
-        <div class="stat fade gate" style="--d:1610ms"><div class="stat__n"><span data-count="4">0</span></div><div class="stat__l">Languages worked in</div></div>
       </div>
 
     </div>
@@ -769,121 +1064,34 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     </div>
   </section>
 
-  <!-- ===================== 02 · SERVICES ===================== -->
-  <section class="pad" id="services" data-sec="02" style="padding-top:0">
+  <!-- ===================== 02 · WHO IT'S BEEN FOR ===================== -->
+  <section class="pad" id="clients" data-sec="02">
     <div class="shell">
       <div class="head">
-        <div class="eyebrow"><span class="rv"><i><b>02</b> &nbsp;— &nbsp;Stuff I do</i></span></div>
-        <h2><span class="rv"><i>Seven things, and the <em>last one</em> is the difference.</i></span></h2>
+        <div class="eyebrow"><span class="rv"><i><b>02</b> &nbsp;— &nbsp;Who it's been for</i></span></div>
+        <h2><span class="rv"><i>Brands, dropshippers and creators — <em>mostly US and UK.</em></i></span></h2>
       </div>
 
-      <div class="rows">
-        <div class="row fade"><div class="row__i">01</div><h3 class="row__t">AI gen</h3><p>Real-looking creators, full ads, generated start to finish.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-        <div class="row fade"><div class="row__i">02</div><h3 class="row__t">Strategy</h3><p>Dig through reviews and competitor ads, find the angle, write the brief, plan what to test.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-        <div class="row fade"><div class="row__i">03</div><h3 class="row__t">Scripts</h3><p>UGC scripts, VSLs, hooks, CTAs. Written for one type of person, not everyone.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-        <div class="row fade"><div class="row__i">04</div><h3 class="row__t">Video</h3><p>UGC edits, product ads, mashups, motion, captions, sound. Made to feel native, not like an ad.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-        <div class="row fade"><div class="row__i">05</div><h3 class="row__t">Statics</h3><p>Image ads, callouts, before/afters, comparison charts, thumbnails.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-        <div class="row fade"><div class="row__i">06</div><h3 class="row__t">Managing it</h3><p>Briefing creators, handling revisions, keeping fresh creative going into the account so nothing goes stale.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-        <div class="row fade"><div class="row__i">07</div><h3 class="row__t">Keeping it clean</h3><p>Creative trackers, naming conventions, a log of every ad with its angle, hook, spend and result. Your ad account stops being a mess and you can actually see what's working.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== 03 + 04 · NIGHT BAND ===================== -->
-  <section class="night band pad" id="work" data-sec="03">
-    <div class="shell">
-      <div class="head">
-        <div class="eyebrow"><span class="rv"><i><b>03</b> &nbsp;— &nbsp;The work</i></span></div>
-        <h2><span class="rv"><i>Five folders. <em>Open any of them.</em></i></span></h2>
-      </div>
-
-      <div class="rows">
-        <a class="row fade" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1D4zCj0DfKF2flQYIVhZtVFLG_4S7-5Cy">
-          <div class="row__i">01</div>
-          <h3 class="row__t">AI-gen video ads</h3>
-          <p>Real-looking creators and full ads, generated start to finish.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-        <a class="row fade" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1Q3zWExTdTJQ7dZzkmpF-4a5tHmiWuwRD">
-          <div class="row__i">02</div>
-          <h3 class="row__t">Video ads <small>UGC &amp; VSL</small></h3>
-          <p>Creator edits, product ads, mashups — cut to feel native.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-        <a class="row fade" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1rrT06MZpo-5xVwFNcI18ZK4_M-mUOpK4">
-          <div class="row__i">03</div>
-          <h3 class="row__t">Static ads</h3>
-          <p>Image ads, callouts, before/afters, comparison charts, thumbnails.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-        <a class="row fade" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1vWS1MWr6DaVEkorCtVRAsMog-j8YjtJf">
-          <div class="row__i">04</div>
-          <h3 class="row__t">Results <small>ROAS</small></h3>
-          <p>Account screenshots from the campaigns behind the creative.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-        <a class="row fade" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/17rSJGVdX1iyr3dRw5hpMuHEPmliIKJrw">
-          <div class="row__i">05</div>
-          <h3 class="row__t">Nice things clients said</h3>
-          <p>Unedited messages, straight out of the chats.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-      </div>
-
-      <div class="head" style="margin-top:clamp(72px,9vw,140px)" data-sec="04">
-        <div class="eyebrow"><span class="rv"><i><b>04</b> &nbsp;— &nbsp;How it's run</i></span></div>
-        <h2><span class="rv"><i>Every ad gets <em>logged.</em></i></span></h2>
-      </div>
-
-      <div class="board">
-        <div class="board__note">
-          <p class="fade">This is the script format I work in — hooks, bodies, bridges, visuals, all mapped before anything gets cut.</p>
-          <p class="fade" style="--d:90ms">You might already use different naming and a different sheet. That's fine — I've worked in plenty of formats and I'll match yours.</p>
+      <div class="collage fade">
+        <div class="collage__bed" aria-hidden="true">
+          <img src="assets/work/averon-upgrade-fit-bed.webp" alt="" loading="lazy" decoding="async" width="240" height="300">
+          <img src="assets/work/selian-peak-myth-bed.webp" alt="" loading="lazy" decoding="async" width="240" height="300">
+          <img src="assets/work/serenity-skin-ritual-bed.webp" alt="" loading="lazy" decoding="async" width="240" height="300">
+          <img src="assets/work/averon-cost-per-wear-bed.webp" alt="" loading="lazy" decoding="async" width="240" height="300">
+          <img src="assets/work/selian-90-days-bed.webp" alt="" loading="lazy" decoding="async" width="240" height="300">
+          <img src="assets/work/averon-second-date-bed.webp" alt="" loading="lazy" decoding="async" width="240" height="300">
         </div>
-        <figure class="board__frame wipe">
-          <span class="board__tag">Script writing format</span>
-          <img id="boardImg" src="assets/board.jpg" alt="Rohan's script writing board — columns for ad type, sizes, variations, hooks, bodies, bridges, visuals and editing guidelines" decoding="async" width="1600" height="710">
-        </figure>
-      </div>
-
-      <div class="trk">
-        <div class="trk__wrap fade">
-          <table>
-            <thead><tr><th>#</th><th>Ad name</th><th>Angle</th><th>Hook</th><th>Format</th><th>Spend</th><th>Result</th></tr></thead>
-            <tbody>
-              <tr><td>01</td><td><b>[BRAND]_AIGEN_A1_HK01_V1</b></td><td>A1</td><td>HK01</td><td>AI gen</td><td>tracked</td><td>tracked</td></tr>
-              <tr><td>02</td><td><b>[BRAND]_UGC_A1_HK04_V2</b></td><td>A1</td><td>HK04</td><td>UGC</td><td>tracked</td><td>tracked</td></tr>
-              <tr><td>03</td><td><b>[BRAND]_VSL_A2_HK02_V1</b></td><td>A2</td><td>HK02</td><td>VSL</td><td>tracked</td><td>tracked</td></tr>
-              <tr><td>04</td><td><b>[BRAND]_STAT_A2_HK07_V3</b></td><td>A2</td><td>HK07</td><td>Static</td><td>tracked</td><td>tracked</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="trk__cap">Structure only — real spend and results live in your tracker, not on a website.</p>
-      </div>
-
-      <p class="mini fade"><a href="#contact" data-cur="Write">Want this running on your account? &nbsp;Let's talk
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
-    </div>
-  </section>
-
-  <!-- ===================== 05 · CLIENTS ===================== -->
-  <section class="pad" id="clients" data-sec="05">
-    <div class="shell">
-      <div class="head">
-        <div class="eyebrow"><span class="rv"><i><b>05</b> &nbsp;— &nbsp;Who it's been for</i></span></div>
-        <h2><span class="rv"><i>Brands, agencies and creators — <em>mostly US and UK.</em></i></span></h2>
-      </div>
-
-      <div class="rows">
-        <div class="row row--plain fade"><div class="row__i">01</div><h3 class="row__t">Taos</h3></div>
-        <div class="row row--plain fade"><div class="row__i">02</div><h3 class="row__t">Dose</h3></div>
-        <div class="row row--plain fade"><div class="row__i">03</div><h3 class="row__t">Royal Canadian</h3></div>
-        <div class="row row--plain fade"><div class="row__i">04</div><h3 class="row__t">Southwind Apparel</h3></div>
-        <div class="row row--plain fade"><div class="row__i">05</div><h3 class="row__t">Motion</h3></div>
-        <div class="row row--plain fade"><div class="row__i">06</div><h3 class="row__t">Serenity Studio</h3></div>
-        <div class="row row--plain fade"><div class="row__i">07</div><h3 class="row__t">FabuLove</h3></div>
-        <div class="row row--plain fade"><div class="row__i">08</div><h3 class="row__t">Cloudly Footwear</h3></div>
-        <div class="row row--plain fade"><div class="row__i">&amp;</div><h3 class="row__t" style="font-family:var(--f-body);font-size:clamp(16px,1.5vw,22px);color:var(--ink-2)">agencies, UGC creators, dropshippers, spa &amp; studio owners</h3></div>
+        <ul class="collage__names">
+          <li style="--s:1.0"><span>Taos</span></li>
+          <li style="--s:0.86"><span>Dose</span></li>
+          <li style="--s:1.14"><span>Royal Canadian</span></li>
+          <li style="--s:0.92"><span>Southwind Apparel</span></li>
+          <li style="--s:1.06"><span>Motion</span></li>
+          <li style="--s:0.9"><span>Serenity Studio</span></li>
+          <li style="--s:1.1"><span>FabuLove</span></li>
+          <li style="--s:0.88"><span>Cloudly Footwear</span></li>
+        </ul>
+        <p class="collage__more">&amp; agencies, UGC creators, dropshippers, spa &amp; studio owners</p>
       </div>
 
       <div class="ghost" id="ghost" aria-hidden="true">
@@ -906,10 +1114,214 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
         <span class="niche">Apparel</span><span class="niche">Spa &amp; wellness</span><span class="niche">Travel</span>
       </div>
 
-      <div class="mkt">
-        <div class="fade"><h4>US &amp; UK</h4><p>Where most of the work sits — DTC brands, agencies and creators.</p></div>
-        <div class="fade" style="--d:90ms"><h4>Norway</h4><p>One brand, run in Norwegian.</p></div>
-        <div class="fade" style="--d:180ms"><h4>Sweden</h4><p>Campaigns shipped in Swedish, working inside SEK ad accounts.</p></div>
+      <p class="mkt__line fade"><b>US &amp; UK</b> is where most of the work sits. One brand run in
+        <b>Norwegian</b>; campaigns shipped in <b>Swedish</b>, inside SEK ad accounts.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 03 + 04 · NIGHT BAND ===================== -->
+  <section class="night band pad" id="work" data-sec="03">
+    <div class="shell">
+      <div class="head">
+        <div class="eyebrow"><span class="rv"><i><b>03</b> &nbsp;— &nbsp;The work</i></span></div>
+        <h2><span class="rv"><i>Three folders. <em>Open any of them.</em></i></span></h2>
+      </div>
+
+      <div class="rows">
+        <a class="row fade" data-fmt="ai" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1D4zCj0DfKF2flQYIVhZtVFLG_4S7-5Cy">
+          <div class="row__i">01</div>
+          <h3 class="row__t">AI-gen video ads</h3>
+          <p>Real-looking creators and full ads, generated start to finish.</p>
+          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+        <a class="row fade" data-fmt="ugc" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1Q3zWExTdTJQ7dZzkmpF-4a5tHmiWuwRD">
+          <div class="row__i">02</div>
+          <h3 class="row__t">Video ads <small>UGC &amp; VSL</small></h3>
+          <p>Creator edits, product ads, mashups — cut to feel native.</p>
+          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+        <a class="row fade" data-fmt="static" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1rrT06MZpo-5xVwFNcI18ZK4_M-mUOpK4">
+          <div class="row__i">03</div>
+          <h3 class="row__t">Static ads</h3>
+          <p>Image ads, callouts, before/afters, comparison charts, thumbnails.</p>
+          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+      </div>
+
+
+      <div class="reel fade">
+        <div class="sheet__top">
+          <p class="sheet__k">Motion — sneak peek</p>
+          <p class="sheet__hint"><span>Full reels in the folders above</span></p>
+        </div>
+        <div class="reel__grid">
+        <ul class="reel__strip">
+          <li class="reel__cell" style="--i:0">
+            <div class="reel__frame">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/norvia-poster.webp" aria-label="Silent preview of a Norvia mushroom-gummy ad — a phone in low light under the line “brain still buffering”">
+                <source src="assets/reel/norvia.mp4" type="video/mp4">
+              </video>
+              <span class="reel__tag">Muted preview</span>
+            </div>
+            <p class="reel__cap"><b>Norvia</b><span>Mixed live action + animation</span></p>
+          </li>
+          <li class="reel__cell" style="--i:1">
+            <div class="reel__frame">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/ugc-poster.webp" aria-label="Silent preview of an Averon ad — an AI-generated creator to camera on a beach front">
+                <source src="assets/reel/ugc.mp4" type="video/mp4">
+              </video>
+              <span class="reel__tag">Muted preview</span>
+            </div>
+            <p class="reel__cap"><b>Averon</b><span>AI creator, shot as UGC</span></p>
+          </li>
+          <li class="reel__cell" style="--i:2">
+            <div class="reel__frame">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/broll-poster.webp" aria-label="Silent preview of generated b-roll — a model turning in a burgundy slip dress">
+                <source src="assets/reel/broll.mp4" type="video/mp4">
+              </video>
+              <span class="reel__tag">Muted preview</span>
+            </div>
+            <p class="reel__cap"><b>AI b-roll</b><span>Generated product motion</span></p>
+          </li>
+        </ul>
+        <div class="reel__note">
+          <p>Six-second cuts, no sound — enough to see the pacing and where the
+            cut lands. The folders above hold the finished ads with audio.</p>
+          <p class="reel__meta">AI-gen &nbsp;·&nbsp; UGC &nbsp;·&nbsp; b-roll</p>
+        </div>
+        </div>
+      </div>
+
+      <div class="sheet fade">
+        <div class="sheet__top">
+          <p class="sheet__k">Selected statics</p>
+          <p class="sheet__hint"><span>Scroll</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></p>
+        </div>
+        <div class="sheet__scroll" tabindex="0" role="region" aria-label="Selected static ads">
+          <ul class="sheet__strip">
+          <li class="cell" style="--i:0">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/selian-peak-myth.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Selian Health ad — a five-panel storyboard cut over gym footage under the headline “who decided 27 was the peak?”">
+              <figcaption><b>Selian Health</b><span>The peak myth</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:1">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/averon-upgrade-fit.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Averon ad — two black garments laid out to spell the word FIT on a cream background">
+              <figcaption><b>Averon</b><span>Upgrade your fit</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:2">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/selian-this-is-not.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Selian Health ad — black layout reading “this is not TRT” with three benefit callouts">
+              <figcaption><b>Selian Health</b><span>This is not TRT</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:3">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/serenity-skin-ritual.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Serenity Studio ad — a facial treatment in close-up framed by flowers, headed “Your Monthly Skin Ritual”">
+              <figcaption><b>Serenity Studio</b><span>Monthly skin ritual</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:4">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/averon-cost-per-wear.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Averon ad — a black tee behind vending-machine glass with the cost-per-wear maths beneath it">
+              <figcaption><b>Averon</b><span>A quarter per wear</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:5">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/selian-90-days.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Selian Health ad — a supplement tub beside a printed 90-day stack summary on warm paper">
+              <figcaption><b>Selian Health</b><span>90-day challenge</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:6">
+            <figure class="tile" style="--ar:880/1565">
+              <img src="assets/work/averon-basics.webp" width="880" height="1565" loading="lazy" decoding="async"
+                   alt="Averon ad — a man in sunglasses and a black tee, captioned “men’s fashion starts with good basics”">
+              <figcaption><b>Averon</b><span>Master the basics</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:7">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/serenity-not-a-studio.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Serenity Studio ad — cream layout reading “Your bedroom isn’t a content studio”">
+              <figcaption><b>Serenity Studio</b><span>Not a content studio</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:8">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/selian-protein.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Selian Health ad — supplement tub and shaker annotated with ingredient callouts">
+              <figcaption><b>Selian Health</b><span>Ingredient callouts</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:9">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/averon-second-date.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Averon ad — a man in a black tee holding up an olive one, headline “she won’t fall for it twice”">
+              <figcaption><b>Averon</b><span>Won’t fall for it twice</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:10">
+            <figure class="tile" style="--ar:880/1100">
+              <img src="assets/work/selian-same-plates.webp" width="880" height="1100" loading="lazy" decoding="async"
+                   alt="Selian Health ad — rusted gym plates in low light under the line “same plates since February”">
+              <figcaption><b>Selian Health</b><span>Same plates</span></figcaption>
+            </figure>
+          </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="head proof__head" style="margin-top:clamp(64px,8vw,120px)" data-sec="04">
+        <div class="eyebrow"><span class="rv"><i><b>04</b> &nbsp;— &nbsp;And then</i></span></div>
+        <h2><span class="rv"><i>What it <em>did.</em></i></span></h2>
+      </div>
+
+      <div class="proof">
+        <a class="proof__card fade" data-fmt="res" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1vWS1MWr6DaVEkorCtVRAsMog-j8YjtJf">
+          <span class="proof__k">Results <b>ROAS</b></span>
+          <span class="proof__t">Account screenshots from the campaigns behind the creative.</span>
+          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+        <a class="proof__card fade" style="--d:90ms" data-fmt="said" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/17rSJGVdX1iyr3dRw5hpMuHEPmliIKJrw">
+          <span class="proof__k">Nice things <b>clients said</b></span>
+          <span class="proof__t">Unedited messages, straight out of the chats.</span>
+          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+      </div>
+
+      <p class="mini fade"><a href="#contact" data-cur="Write">Want this running on your account? &nbsp;Let's talk
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+    </div>
+  </section>
+
+  <!-- ===================== 05 · SERVICES ===================== -->
+  <section class="pad" id="services" data-sec="05">
+    <div class="shell">
+      <div class="head">
+        <div class="eyebrow"><span class="rv"><i><b>05</b> &nbsp;— &nbsp;Stuff I do</i></span></div>
+        <h2><span class="rv"><i>Seven things, and the <em>last one</em> is the difference.</i></span></h2>
+      </div>
+
+      <div class="rows">
+        <div class="row fade"><div class="row__i">01</div><h3 class="row__t">AI gen</h3><p>Real-looking creators, full ads, generated start to finish.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="row fade"><div class="row__i">02</div><h3 class="row__t">Strategy</h3><p>Dig through reviews and competitor ads, find the angle, write the brief, plan what to test.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="row fade"><div class="row__i">03</div><h3 class="row__t">Scripts</h3><p>UGC scripts, VSLs, hooks, CTAs. Written for one type of person, not everyone.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="row fade"><div class="row__i">04</div><h3 class="row__t">Video</h3><p>UGC edits, product ads, mashups, motion, captions, sound. Made to feel native, not like an ad.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="row fade"><div class="row__i">05</div><h3 class="row__t">Statics</h3><p>Image ads, callouts, before/afters, comparison charts, thumbnails.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="row fade"><div class="row__i">06</div><h3 class="row__t">Managing it</h3><p>Briefing creators, handling revisions, keeping fresh creative going into the account so nothing goes stale.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="row fade"><div class="row__i">07</div><h3 class="row__t">Keeping it clean</h3><p>Creative trackers, naming conventions, a log of every ad with its angle, hook, spend and result. Your ad account stops being a mess and you can actually see what's working.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
       </div>
     </div>
   </section>
@@ -939,7 +1351,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     </div>
   </section>
 
-  <div class="wordmark" id="wordmark" aria-hidden="true"><h2>Falwariya</h2></div>
 </main>
 
 <footer class="foot">
@@ -1075,26 +1486,37 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   }
 
   /* ============ 3 · reveals ============ */
-  var targets = [].slice.call(doc.querySelectorAll('.rv, .wf, .fade, .wipe, .ghost, .wordmark, .pull'))
+  var targets = [].slice.call(doc.querySelectorAll('.rv, .wf, .fade, .wipe, .ghost, .pull'))
     .filter(function (el) { return !el.closest('.gate'); });   // gated ones: see go()
   var pending = [], sweepPast = function () {};
 
   if (!('IntersectionObserver' in window) || reduce) {
     targets.forEach(function (t) { t.classList.add('in'); });
   } else {
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) show(e.target); });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    var mkIO = function (threshold) {
+      return new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) show(e.target); });
+      }, { rootMargin: '0px 0px -10% 0px', threshold: threshold });
+    };
+    var io = mkIO(0.1);
+
+    /* A .wipe clips *itself* to zero width until it reveals, and Intersection-
+       Observer measures the **clipped** box — the ratio stays 0 no matter how
+       far it scrolls in, so at threshold .1 the callback that would un-clip it
+       can never fire and the element stays invisible forever. Self-clipping
+       targets get their own observer at threshold 0, which does fire. */
+    var ioClip = mkIO(0);
+    var obs = function (el) { return el.classList.contains('wipe') ? ioClip : io; };
 
     var show = function (el) {
       el.classList.add('in');
-      io.unobserve(el);
+      obs(el).unobserve(el);
       var i = pending.indexOf(el);
       if (i > -1) pending.splice(i, 1);
     };
 
     pending = targets.slice();
-    targets.forEach(function (t) { io.observe(t); });
+    targets.forEach(function (t) { obs(t).observe(t); });
 
     /* IntersectionObserver only reports state *changes*. Anything that goes
        from below the fold to above it without ever intersecting — a restored
@@ -1112,20 +1534,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   doc.querySelectorAll('.rows').forEach(function (g) {
     g.querySelectorAll('.row').forEach(function (el, i) { el.style.setProperty('--d', Math.min(i * 70, 460) + 'ms'); });
   });
-
-  /* ============ 4 · giant wordmark, letter by letter ============ */
-  var wm = doc.querySelector('.wordmark h2');
-  if (wm) {
-    var word = wm.textContent.trim();
-    wm.textContent = '';
-    [].forEach.call(word, function (ch, i) {
-      var w = doc.createElement('span'); w.className = 'ltr';
-      var inner = doc.createElement('i');
-      inner.textContent = ch === ' ' ? ' ' : ch;
-      inner.style.setProperty('--d', (i * 90) + 'ms');
-      w.appendChild(inner); wm.appendChild(w);
-    });
-  }
 
   /* ============ 5 · headline ad slot ============ */
   var slot = doc.getElementById('slot');
@@ -1175,8 +1583,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   var railFill = doc.getElementById('railFill'), railNow = doc.getElementById('railNow');
   var night = doc.querySelector('.night');
   var secs = [].slice.call(doc.querySelectorAll('[data-sec]'));
-  var boardImg = doc.getElementById('boardImg');
-  var boardFrame = boardImg ? boardImg.parentElement : null;
   var ghost = doc.getElementById('ghost');
   var ghostWords = ghost ? [].slice.call(ghost.querySelectorAll('.ghost__w')) : [];
   var lastY = 0, frame = false;
@@ -1210,12 +1616,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     }
 
     if (!reduce && fine) {
-      if (boardFrame) {
-        var br = boardFrame.getBoundingClientRect();
-        if (br.bottom > -240 && br.top < innerHeight + 240) {
-          boardImg.style.transform = 'scale(1.09) translateY(' + ((progress(boardFrame) - 0.5) * -4.2) + '%)';
-        }
-      }
       if (ghost) {
         var gr = ghost.getBoundingClientRect();
         if (gr.bottom > -300 && gr.top < innerHeight + 300) {
@@ -1255,6 +1655,46 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   if (menuX) menuX.addEventListener('click', closeMenu);
   if (menu) menu.querySelector('.menu__bg').addEventListener('click', closeMenu);
   addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+
+  /* ============ 8b · theme toggle ============ */
+  /* The initial value is set by the inline script in the head, before paint.
+     This only handles the click and remembers the choice. */
+  var themer = doc.getElementById('themer');
+  if (themer) {
+    var syncTheme = function () {
+      var dark = doc.documentElement.getAttribute('data-theme') === 'dark';
+      themer.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+      themer.setAttribute('data-cur', dark ? 'Light' : 'Dark');
+    };
+    syncTheme();
+    themer.addEventListener('click', function () {
+      var next = doc.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      doc.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('rf-theme', next); } catch (e) {}
+      syncTheme();
+    });
+  }
+
+  /* ============ 8c · motion peek: play only while on screen ============ */
+  /* Autoplay is muted and loops, but only for the clips actually in view —
+     three decoding at once on a phone is a battery and jank problem. Under
+     prefers-reduced-motion nothing plays; the poster frame stands in. */
+  var reels = [].slice.call(doc.querySelectorAll('.reel__v'));
+  if (reels.length && !reduce && 'IntersectionObserver' in window) {
+    var rio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          if (v.preload === 'none') v.preload = 'auto';
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});   /* autoplay refused: poster stays */
+        } else if (!v.paused) {
+          v.pause();
+        }
+      });
+    }, { rootMargin: '80px 0px', threshold: 0.25 });
+    reels.forEach(function (v) { rio.observe(v); });
+  }
 
   /* ============ 9 · cursor: instant ring + lagging label pill ============ */
   if (fine && !reduce) {

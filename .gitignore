@@ -6,3 +6,7 @@ Thumbs.db
 _site/
 _to_delete/
 .netlify/
+.wix.env
+
+# Rohan's marked-up feedback deck — working input, and the repo is public
+files/

@@ -50,8 +50,30 @@ async function fontBlock(inline) {
 }
 
 const body = await readFile(p('src/page.html'), 'utf8');
-const img = await readFile(p('assets/board.jpg'));
-const imgData = `data:image/jpeg;base64,${img.toString('base64')}`;
+
+/* Selected-work stills. index.html links them; the single-file build inlines
+   them so it still works with no network at all. */
+const workFiles = (await readdir(p('assets/work')).catch(() => []))
+  .filter((f) => f.endsWith('.webp'));
+const workData = {};
+for (const f of workFiles) {
+  const buf = await readFile(p('assets/work', f));
+  workData[f] = `data:image/webp;base64,${buf.toString('base64')}`;
+}
+const inlineWork = (html) =>
+  html.replace(/assets\/work\/([A-Za-z0-9_-]+\.webp)/g, (m, f) => workData[f] || m);
+
+/* Motion peek. Poster frames are inlined so the single-file build still shows
+   the clips as stills; the .mp4s are NOT inlined — they would add megabytes to
+   a file whose whole point is being emailable. Offline, the posters stand in. */
+const reelFiles = (await readdir(p('assets/reel')).catch(() => []));
+const reelPosters = {};
+for (const f of reelFiles.filter((f) => f.endsWith('.webp'))) {
+  const buf = await readFile(p('assets/reel', f));
+  reelPosters[f] = `data:image/webp;base64,${buf.toString('base64')}`;
+}
+const inlinePosters = (html) =>
+  html.replace(/assets\/reel\/([A-Za-z0-9_-]+\.webp)/g, (m, f) => reelPosters[f] || m);
 
 const shell = (inner) => `<!doctype html>
 <html lang="en">
@@ -62,8 +84,8 @@ ${inner}
 </html>
 `;
 
-const local  = body.replace('__FONTFACE__', await fontBlock(false)).replace('__BOARD__', 'assets/board.jpg');
-const inlined = body.replace('__FONTFACE__', await fontBlock(true)).replace('__BOARD__', imgData);
+const local  = body.replace('__FONTFACE__', await fontBlock(false));
+const inlined = inlinePosters(inlineWork(body.replace('__FONTFACE__', await fontBlock(true))));
 
 await writeFile(p('index.html'), shell(local), 'utf8');
 await mkdir(p('dist'), { recursive: true });
@@ -73,7 +95,14 @@ await writeFile(p('dist/artifact-body.html'), inlined, 'utf8');
 /* ---- _site/ : the Netlify publish directory (index.html + assets only) ---- */
 await mkdir(p('_site/assets/fonts'), { recursive: true });
 await writeFile(p('_site/index.html'), shell(local), 'utf8');
-await copyFile(p('assets/board.jpg'), p('_site/assets/board.jpg'));
+for (const f of workFiles) {
+  await mkdir(p('_site/assets/work'), { recursive: true });
+  await copyFile(p('assets/work', f), p('_site/assets/work', f));
+}
+for (const f of reelFiles) {
+  await mkdir(p('_site/assets/reel'), { recursive: true });
+  await copyFile(p('assets/reel', f), p('_site/assets/reel', f));
+}
 let fontCount = 0;
 for (const f of await readdir(p('assets/fonts'))) {
   if (!f.endsWith('.woff2')) continue;
@@ -85,4 +114,4 @@ const kb = (s) => (Buffer.byteLength(s) / 1024).toFixed(0) + ' KB';
 console.log('built  index.html                 ' + kb(shell(local)) + '  (+ assets/)');
 console.log('built  dist/rohan-falwariya.html  ' + kb(shell(inlined)) + '  self-contained');
 console.log('built  dist/artifact-body.html    ' + kb(inlined));
-console.log('built  _site/                     index.html + board.jpg + ' + fontCount + ' fonts  (Netlify publish dir)');
+console.log('built  _site/                     index.html + ' + fontCount + ' fonts + ' + workFiles.length + ' stills + ' + reelFiles.length + ' reel files  (Netlify publish dir)');
