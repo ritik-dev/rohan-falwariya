@@ -16,9 +16,9 @@ US/UK) plus, where possible, evidence inside the ad creative itself.
 | **Serenity Studio** | serenitystudiosmiami.com | none — type-set wordmark on Squarespace | `#9C8B7E`, `#A07F68`, `#B5967F`, `#8B6F60` — warm earthy tans | **Confident** — the "your bedroom isn't a content studio" ad matches the site's own "natural light photo studio rental, earthy tones" |
 | **Taos** | taosfootwear.com | `20250728_Taos_Logo_282828.svg` — lowercase `täōs`, **real SVG** | `#282828` ink, `#C5A370` tan, `#C46142` terracotta | **Likely** — only prominent footwear "Taos"; but it's an established 2005 brand, so verify he actually worked with them |
 | **Dose** | dosedaily.co | `logo-dark.png` — serif wordmark | `#57665C` sage, `#6E8275`, `#E86309` | **Likely** — liquid supplements DTC, matches the niche, but "Dose" is a common name |
-| **Motion** | motionsupplements.com? | favicon only | site colours are WordPress/Divi defaults (`#2EA3F2`, `#0073AA`), not brand colours | **Unconfirmed** — a WordPress store, unlike the Shopify DTC brands he works with |
-| **Royal Canadian** | — | — | — | **Not found** — `royalcanadian.co` returns 503 |
-| **Cloudly Footwear** | — | — | — | **Not found** — `cloudly.co` is a 114-byte parked page; the near matches (Cloud Footwear, On Cloud) are different, established companies |
+| **Motion** | **not** motionsupplements.com | — | — | **Real client, site unknown** — see below |
+| **Royal Canadian** | unknown | — | — | **Real client, site unknown** — footwear ("Cambridge Boots") |
+| **Cloudly Footwear** | not cloudly.co (parked) | — | — | **Real client, site unknown** — insoles |
 
 ## What this means for the collage
 
@@ -42,3 +42,32 @@ Two blockers before any of this ships:
 
 Using client logos to say who you have worked for is normal practice, but these
 are third-party trademarks: only publish the ones Rohan confirms.
+
+
+## Update — the video folder settles the client list
+
+The `VID ADS - ugc, vsl` Drive folder is organised **by client name**, and every
+one of the eight names on the page has a video in it: `TAOS Footware.mp4`,
+`DOSE.mp4`, `Royal Candian.mp4`, `SouthWInd Apparel.mov`, `Motion.mp4`,
+`Serenity studio.mov`, `FabuLove.mp4`, `Cloudly Footware.mp4`. So the client
+list is real — the earlier worry that it did not match the creative was only
+ever about the *statics* folder, which happens to hold different accounts.
+
+Watching those clips also corrected and confirmed things the web search could not:
+
+* **Motion is not a supplements brand.** Its ad is a service pitch — "what
+  happens when you have a free assistant for a week". `motionsupplements.com`
+  was the wrong guess and is not used anywhere.
+* **Royal Canadian is footwear** — the ad opens on a branded boot box for the
+  "Cambridge Boots". That is why "Royal Canadian" searches went nowhere: it is a
+  small footwear label, not the Mint or a mental-health clinic.
+* **Cloudly Footwear is real** — its ad shows branded insoles, so the parked
+  `cloudly.co` is just not their live storefront.
+* **Dose is confirmed** as liquid supplements: the ad pours a liver shot from a
+  Dose-branded bottle, which matches dosedaily.co.
+* **Serenity Studio is confirmed** twice over: its ad is a walkthrough captioned
+  "THE BEST CONTENT STUDIO — SERENITYSTUDIO MIAMI".
+
+Still needed from Rohan before any logo goes up: the storefront URLs for
+**Motion**, **Royal Canadian** and **Cloudly Footwear**, and confirmation that
+**Taos** is taosfootwear.com.

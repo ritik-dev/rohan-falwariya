@@ -1,4 +1,4 @@
-<title>Rohan Falwariya</title>
+<title>Rohan</title>
 <meta name="description" content="Creative strategist and ad editor for DTC brands. AI-gen ads, UGC, VSLs, product ads and statics — angle to edit to numbers.">
 
 <style>
@@ -602,13 +602,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   filter:saturate(.9) brightness(.94);
   transition:filter .6s var(--ease), transform .8s var(--expo);
 }
-.reel__tag{
-  position:absolute; left:0; bottom:0; z-index:2;
-  font-family:var(--f-mono); font-size:11px; letter-spacing:.15em; text-transform:uppercase;
-  background:color-mix(in oklab, var(--night) 78%, transparent);
-  -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
-  color:var(--night-ink2); padding:6px 9px; opacity:.9;
-}
 .reel__cap{
   margin:11px 0 0; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.13em;
   text-transform:uppercase; color:var(--night-ink2);
@@ -667,7 +660,42 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   transition-delay:calc(var(--i) * 70ms);
 }
 .cell:nth-child(even){ margin-top:clamp(18px,2.6vw,44px); }
-.sheet.in .cell{ opacity:1; transform:none; filter:blur(0); }
+.sheet.in .cell,.strip.in .cell{ opacity:1; transform:none; filter:blur(0); }
+
+/* Each folder is a strip of its own work with the link underneath — Rohan's
+   note was "pahale bhai videos chala then neche dio ki yelo link khol ko":
+   play the work first, don't open with a link. */
+.strip{ margin-top:clamp(52px,6.5vw,96px); }
+.strip:first-of-type{ margin-top:clamp(30px,3.6vw,54px); }
+.strip__foot{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:18px 26px; flex-wrap:wrap; margin-top:clamp(16px,2vw,26px);
+  padding-top:15px; border-top:1px solid var(--night-rule);
+}
+.strip__note{ margin:0; color:var(--night-ink2); font-size:14.5px; max-width:52ch; }
+.strip__link{
+  display:inline-flex; align-items:center; gap:10px; flex:none;
+  font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--night-ink); border-bottom:1px solid var(--night-rule); padding-bottom:5px;
+  transition:color .35s var(--ease), border-color .35s var(--ease);
+}
+.strip__link svg{ width:14px; height:14px; transition:transform .45s var(--expo); }
+@media (hover:hover) and (pointer:fine){
+  .strip__link:hover{ color:var(--night-acc); border-color:var(--night-acc); }
+  .strip__link:hover svg{ transform:translate(3px,-3px); }
+}
+
+/* video cells sit in the same strip as the stills, just 9:16 */
+.tile--v{ position:relative; }
+.tile--v .reel__v{
+  display:block; height:clamp(238px,30vw,412px); width:auto; aspect-ratio:9/16;
+  object-fit:cover; border:1px solid var(--night-rule); border-radius:4px;
+  background:var(--night-2); filter:saturate(.92) brightness(.9);
+  transition:filter .65s var(--ease), transform .75s var(--expo);
+}
+@media (hover:hover) and (pointer:fine){
+  .tile--v:hover .reel__v{ filter:none; transform:translateY(-7px); }
+}
 
 .tile{ margin:0; }
 .tile img{
@@ -767,10 +795,25 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 .ghost__w.is-ink{ color:var(--ink); }
 
 /* ---------------- niches + markets ---------------- */
-.niches{ display:flex; flex-wrap:wrap; gap:8px; margin-top:clamp(28px,3.6vw,52px); }
-.niche{ font-family:var(--f-mono); font-size:11px; letter-spacing:.11em; text-transform:uppercase; border:1px solid var(--rule); border-radius:999px; padding:9px 15px; color:var(--ink-2); transition:background-color .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), transform .35s var(--expo); }
+.niches{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:.06em .3em;
+  margin-top:clamp(30px,4vw,54px); max-width:min(100%,20em);
+}
+/* "niche highlight krwade bade bade shabd" - these were 11px mono pills and
+   read as metadata. Set as display words they carry the same weight as the
+   client names above them, which is the point: the range IS the credential. */
+.niche{
+  font-family:var(--f-disp); font-weight:400; text-transform:none;
+  font-size:clamp(21px,2.5vw,38px); line-height:1.06; letter-spacing:-.022em;
+  border:0; border-radius:0; padding:0; color:var(--ink);
+  transition:color .35s var(--ease), transform .45s var(--expo);
+}
+/* a middot separator dangles at the end of a wrapped line and reads as a typo;
+   a comma is what prose does there, and these now ARE a sentence */
+.niche::after{ content:","; color:var(--ink-3); margin-right:.26em; }
+.niche:last-child::after{ content:"."; color:var(--ink-3); margin-right:0; }
 @media (hover:hover) and (pointer:fine){
-  .niche:hover{ background:var(--accent); border-color:var(--accent); color:var(--paper); transform:translateY(-2px); }
+  .niche:hover{ color:var(--accent); transform:translateY(-2px); }
 }
 
 .mkt{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:6px; overflow:hidden; margin-top:clamp(28px,3.6vw,52px); }
@@ -826,9 +869,13 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   .collage__names li:hover span{ color:var(--bc,var(--accent)); transform:translateY(-3px); }
   :root[data-theme="dark"] .collage__names li:hover span{ color:var(--bcd,var(--accent)); }
 }
+/* "isko bade krwade jaise baki hai" - it was an 11px mono footnote under
+   display-sized names, which made it read as small print. Same family as the
+   names now, a step down in size and in the softer ink. */
 .collage__more{
-  margin:clamp(20px,2.6vw,34px) 0 0; font-family:var(--f-mono);
-  font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  margin:clamp(20px,2.6vw,34px) 0 0; font-family:var(--f-disp);
+  font-weight:400; font-size:clamp(19px,2.1vw,31px); line-height:1.14;
+  letter-spacing:-.018em; text-transform:none; color:var(--ink-2); max-width:30ch;
 }
 .mkt div{ background:var(--paper); padding:22px 20px; }
 .mkt h4{ margin:0 0 6px; font-family:var(--f-disp); font-weight:400; font-size:clamp(20px,2.2vw,30px); letter-spacing:-.02em; }
@@ -1028,7 +1075,7 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     <div class="shell">
       <div class="head">
         <div class="eyebrow"><span class="rv"><i><b>01</b> &nbsp;— &nbsp;The whole thing</i></span></div>
-        <h2><span class="rv"><i>Angle, script, edit, statics — <em>then the numbers.</em></i></span></h2>
+        <h2><span class="rv"><i>Everything I know came from <em>actually working with clients.</em></i></span></h2>
       </div>
 
       <div class="intro__grid">
@@ -1049,7 +1096,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
             Been at it over two years with brands, creators and agency owners, mostly
             <b>fashion, supplements, apparel, skincare, footwear</b> and spa/wellness.
           </p>
-          <p class="pull" style="--d:90ms">Everything I know came from <em>actually working with clients.</em></p>
           <p class="fade" style="--d:160ms">
             Then studying — YouTube, plus <span class="mark">Ecom Talent and Evolve</span>. Not the other way round.
           </p>
@@ -1085,7 +1131,7 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           <li style="--s:1.1;--bc:#A02447;--bcd:#E0577E"><span>FabuLove</span></li>
           <li style="--s:0.88"><span>Cloudly Footwear</span></li>
         </ul>
-        <p class="collage__more">&amp; agencies, UGC creators, dropshippers, spa &amp; studio owners</p>
+        <p class="collage__more">&amp; agencies, UGC creators, dropshippers, spa and studio owners.</p>
       </div>
 
       <div class="ghost" id="ghost" aria-hidden="true">
@@ -1118,78 +1164,166 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     <div class="shell">
       <div class="head">
         <div class="eyebrow"><span class="rv"><i><b>03</b> &nbsp;— &nbsp;The work</i></span></div>
-        <h2><span class="rv"><i>Three folders. <em>Open any of them.</em></i></span></h2>
+        <h2><span class="rv"><i>Watch it first. <em>Then open the folders.</em></i></span></h2>
       </div>
 
-      <div class="rows">
-        <a class="row fade" data-fmt="ai" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1D4zCj0DfKF2flQYIVhZtVFLG_4S7-5Cy">
-          <div class="row__i">01</div>
-          <h3 class="row__t">AI-gen video ads</h3>
-          <p>Real-looking creators and full ads, generated start to finish.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-        <a class="row fade" data-fmt="ugc" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1Q3zWExTdTJQ7dZzkmpF-4a5tHmiWuwRD">
-          <div class="row__i">02</div>
-          <h3 class="row__t">Video ads <small>UGC &amp; VSL</small></h3>
-          <p>Creator edits, product ads, mashups — cut to feel native.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-        <a class="row fade" data-fmt="static" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1rrT06MZpo-5xVwFNcI18ZK4_M-mUOpK4">
-          <div class="row__i">03</div>
-          <h3 class="row__t">Static ads</h3>
-          <p>Image ads, callouts, before/afters, comparison charts, thumbnails.</p>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-      </div>
-
-
-      <div class="reel fade">
+      <div class="strip fade">
         <div class="sheet__top">
-          <p class="sheet__k">Motion — sneak peek</p>
-          <p class="sheet__hint"><span>Full reels in the folders above</span></p>
+          <p class="sheet__k">AI-gen video</p>
+          <p class="sheet__hint"><span>Scroll</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></p>
         </div>
-        <div class="reel__grid">
-        <ul class="reel__strip">
-          <li class="reel__cell" style="--i:0">
-            <div class="reel__frame">
+        <div class="sheet__scroll" tabindex="0" role="region" aria-label="AI-generated video ads">
+          <ul class="sheet__strip">
+          <li class="cell" style="--i:0">
+            <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/norvia-poster.webp" aria-label="Silent preview of a Norvia mushroom-gummy ad — a phone in low light under the line “brain still buffering”">
+                     poster="assets/reel/norvia-poster.webp" aria-label="Silent preview of a Norvia ad — a phone on a desk under the line “brain still buffering”">
                 <source src="assets/reel/norvia.mp4" type="video/mp4">
               </video>
-              <span class="reel__tag">Muted preview</span>
-            </div>
-            <p class="reel__cap"><b>Norvia</b><span>Mixed live action + animation</span></p>
+              <figcaption><b>Norvia</b><span>Live action + animation</span></figcaption>
+            </figure>
           </li>
-          <li class="reel__cell" style="--i:1">
-            <div class="reel__frame">
+          <li class="cell" style="--i:1">
+            <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/ugc-poster.webp" aria-label="Silent preview of an Averon ad — an AI-generated creator to camera on a beach front">
+                     poster="assets/reel/ai-ugc3-poster.webp" aria-label="Silent preview — an AI-generated creator seated on a European street talking about a Fitflex tee">
+                <source src="assets/reel/ai-ugc3.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Fitflex</b><span>Generated creator, on location</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:2">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/ugc-poster.webp" aria-label="Silent preview — an AI-generated creator on a beach front presenting a t-shirt">
                 <source src="assets/reel/ugc.mp4" type="video/mp4">
               </video>
-              <span class="reel__tag">Muted preview</span>
-            </div>
-            <p class="reel__cap"><b>Averon</b><span>AI creator, shot as UGC</span></p>
+              <figcaption><b>AI creator</b><span>Apparel, shot as UGC</span></figcaption>
+            </figure>
           </li>
-          <li class="reel__cell" style="--i:2">
-            <div class="reel__frame">
+          <li class="cell" style="--i:3">
+            <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/broll-poster.webp" aria-label="Silent preview of generated b-roll — a model turning in a burgundy slip dress">
+                     poster="assets/reel/ai-ugc2-poster.webp" aria-label="Silent preview — an AI-generated creator against a studio backdrop demonstrating fit and sizing">
+                <source src="assets/reel/ai-ugc2.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>AI creator</b><span>Fit and sizing demo</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:4">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/ai-animated2-poster.webp" aria-label="Silent preview — a generated scene of a hunting jacket on a rail with the price tag still on">
+                <source src="assets/reel/ai-animated2.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>AI scene</b><span>Closet angle, generated</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:5">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/broll-poster.webp" aria-label="Silent preview — generated b-roll of a model turning in a burgundy slip dress">
                 <source src="assets/reel/broll.mp4" type="video/mp4">
               </video>
-              <span class="reel__tag">Muted preview</span>
-            </div>
-            <p class="reel__cap"><b>AI b-roll</b><span>Generated product motion</span></p>
+              <figcaption><b>AI b-roll</b><span>Generated product motion</span></figcaption>
+            </figure>
           </li>
-        </ul>
-        <div class="reel__note">
-          <p>Six-second cuts, no sound — enough to see the pacing and where the
-            cut lands. The folders above hold the finished ads with audio.</p>
-          <p class="reel__meta">AI-gen &nbsp;·&nbsp; UGC &nbsp;·&nbsp; b-roll</p>
+          </ul>
         </div>
+        <div class="strip__foot">
+          <p class="strip__note">Silent six-second cuts. Real-looking creators and full ads, generated start to finish.</p>
+          <a class="strip__link" href="https://drive.google.com/drive/folders/1D4zCj0DfKF2flQYIVhZtVFLG_4S7-5Cy" target="_blank" rel="noopener" data-cur="Open ↗">Open the AI-gen folder<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
         </div>
       </div>
 
-      <div class="sheet fade">
+      <div class="strip fade">
+        <div class="sheet__top">
+          <p class="sheet__k">UGC &amp; VSL video</p>
+          <p class="sheet__hint"><span>Scroll</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></p>
+        </div>
+        <div class="sheet__scroll" tabindex="0" role="region" aria-label="UGC and VSL video ads">
+          <ul class="sheet__strip">
+          <li class="cell" style="--i:0">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/taos-poster.webp" aria-label="Silent preview of a Taos ad — shoes worn with leopard-print trousers">
+                <source src="assets/reel/taos.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Taos</b><span>Footwear</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:1">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/dose-poster.webp" aria-label="Silent preview of a Dose ad — a liver shot being poured into a glass">
+                <source src="assets/reel/dose.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Dose</b><span>Supplements</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:2">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/royalcanadian-poster.webp" aria-label="Silent preview of a Royal Canadian ad — a Cambridge boot box being opened">
+                <source src="assets/reel/royalcanadian.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Royal Canadian</b><span>Footwear</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:3">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/southwind-poster.webp" aria-label="Silent preview of a Southwind Apparel ad — a patterned dress worn against a brick wall">
+                <source src="assets/reel/southwind.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Southwind Apparel</b><span>Apparel</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:4">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/serenity-poster.webp" aria-label="Silent preview of a Serenity Studio ad — a walk through the Miami content studio">
+                <source src="assets/reel/serenity.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Serenity Studio</b><span>Spa & studio</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:5">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/fabulove-poster.webp" aria-label="Silent preview of a FabuLove ad — a creator showing a necklace to camera">
+                <source src="assets/reel/fabulove.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>FabuLove</b><span>Jewellery</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:6">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/cloudly-poster.webp" aria-label="Silent preview of a Cloudly Footwear ad — an insole held up to camera">
+                <source src="assets/reel/cloudly.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Cloudly Footwear</b><span>Footwear</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:7">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/motion-poster.webp" aria-label="Silent preview of a Motion ad — a creator at a laptop on a sofa">
+                <source src="assets/reel/motion.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Motion</b><span>Service</span></figcaption>
+            </figure>
+          </li>
+          </ul>
+        </div>
+        <div class="strip__foot">
+          <p class="strip__note">Silent six-second cuts. Creator edits, product ads and mashups — made to feel native, not like an ad.</p>
+          <a class="strip__link" href="https://drive.google.com/drive/folders/1Q3zWExTdTJQ7dZzkmpF-4a5tHmiWuwRD" target="_blank" rel="noopener" data-cur="Open ↗">Open the video folder<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
+      </div>
+
+      <div class="strip fade">
         <div class="sheet__top">
           <p class="sheet__k">Selected statics</p>
           <p class="sheet__hint"><span>Scroll</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></p>
@@ -1275,6 +1409,10 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           </li>
           </ul>
         </div>
+        <div class="strip__foot">
+          <p class="strip__note">Image ads, callouts, before/afters, comparison charts, thumbnails.</p>
+          <a class="strip__link" href="https://drive.google.com/drive/folders/1rrT06MZpo-5xVwFNcI18ZK4_M-mUOpK4" target="_blank" rel="noopener" data-cur="Open ↗">Open the statics folder<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
       </div>
 
       <div class="head proof__head" style="margin-top:clamp(64px,8vw,120px)" data-sec="04">
@@ -1295,8 +1433,6 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
         </a>
       </div>
 
-      <p class="mini fade"><a href="#contact" data-cur="Write">Want this running on your account? &nbsp;Let's talk
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
     </div>
   </section>
 
@@ -1317,6 +1453,9 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
         <div class="row fade"><div class="row__i">06</div><h3 class="row__t">Managing it</h3><p>Briefing creators, handling revisions, keeping fresh creative going into the account so nothing goes stale.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
         <div class="row fade"><div class="row__i">07</div><h3 class="row__t">Keeping it clean</h3><p>Creative trackers, naming conventions, a log of every ad with its angle, hook, spend and result. Your ad account stops being a mess and you can actually see what's working.</p><span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
       </div>
+
+      <p class="mini fade"><a href="#contact" data-cur="Write">Want this running on your account? &nbsp;Let's talk
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
     </div>
   </section>
 
