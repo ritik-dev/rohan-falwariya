@@ -668,20 +668,30 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 .strip{ margin-top:clamp(52px,6.5vw,96px); }
 .strip:first-of-type{ margin-top:clamp(30px,3.6vw,54px); }
 .strip__foot{
-  display:flex; align-items:baseline; justify-content:space-between;
+  display:flex; align-items:center; justify-content:space-between;
   gap:18px 26px; flex-wrap:wrap; margin-top:clamp(16px,2vw,26px);
   padding-top:15px; border-top:1px solid var(--night-rule);
 }
 .strip__note{ margin:0; color:var(--night-ink2); font-size:14.5px; max-width:52ch; }
+/* "in teeno ko highlight krde" - all three folder links were quiet underlined
+   mono and read as footnotes, so the actual call to action on the work section
+   disappeared. Accent-outlined pills, filling on hover: same language as .btn
+   and .nav__link, so this stays one system rather than a new button style. */
 .strip__link{
   display:inline-flex; align-items:center; gap:10px; flex:none;
   font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--night-ink); border-bottom:1px solid var(--night-rule); padding-bottom:5px;
-  transition:color .35s var(--ease), border-color .35s var(--ease);
+  color:var(--night-acc); border:1px solid var(--night-acc); border-radius:999px;
+  padding:12px 19px; position:relative; overflow:hidden; isolation:isolate;
+  transition:color .4s var(--ease);
+}
+.strip__link::before{
+  content:""; position:absolute; inset:0; background:var(--night-acc); z-index:-1;
+  transform:translateY(101%); transition:transform .5s var(--io);
 }
 .strip__link svg{ width:14px; height:14px; transition:transform .45s var(--expo); }
 @media (hover:hover) and (pointer:fine){
-  .strip__link:hover{ color:var(--night-acc); border-color:var(--night-acc); }
+  .strip__link:hover{ color:var(--night); }
+  .strip__link:hover::before{ transform:none; }
   .strip__link:hover svg{ transform:translate(3px,-3px); }
 }
 
@@ -741,18 +751,28 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 }
 @media (max-width:700px){ .proof{ grid-template-columns:1fr; } }
 .proof__card{
-  display:grid; grid-template-columns:minmax(0,1fr) 46px; align-items:start;
-  gap:14px; padding:clamp(20px,2.4vw,30px);
+  display:grid; grid-template-columns:minmax(0,1fr) 54px; align-items:start;
+  gap:16px; padding:clamp(26px,3vw,40px);
   border:1px solid var(--night-rule); border-radius:6px; background:var(--night-2);
   transition:border-color .4s var(--ease), background-color .4s var(--ease), transform .5s var(--expo);
 }
+/* The cards carry data-fmt but nothing was assigning --fmt outside .row, so both
+   fell back to the generic accent and looked identical. */
+.proof__card[data-fmt="res"]{ --fmt:var(--c-res); }
+.proof__card[data-fmt="said"]{ --fmt:var(--c-said); }
+/* "indono result and testimonial ko chamka de" - an 11px mono kicker over 14.5px
+   body read as two more footnotes at the bottom of the dark band, right where the
+   proof should land hardest. The label IS the destination, so it is set as display
+   type at section-heading scale with the payoff in accent italic - the same move
+   the section headings already make. The copy itself is untouched. */
 .proof__k{
-  grid-column:1; font-family:var(--f-mono); font-size:11px; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--night-ink2);
+  grid-column:1; font-family:var(--f-disp); font-weight:400;
+  font-size:clamp(25px,3vw,42px); line-height:1.02; letter-spacing:-.028em;
+  text-transform:none; color:var(--night-ink);
 }
-.proof__k b{ color:var(--fmt,var(--night-acc)); font-weight:500; }
+.proof__k b{ font-style:italic; font-weight:400; color:var(--fmt,var(--night-acc)); }
 .proof__t{
-  grid-column:1; font-size:14.5px; color:var(--night-ink2); max-width:34ch;
+  grid-column:1; font-size:15px; color:var(--night-ink2); max-width:34ch;
 }
 .proof__card .row__go{ grid-column:2; grid-row:1 / span 2; align-self:center; }
 @media (hover:hover) and (pointer:fine){
@@ -795,25 +815,33 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 .ghost__w.is-ink{ color:var(--ink); }
 
 /* ---------------- niches + markets ---------------- */
-.niches{
-  display:flex; flex-wrap:wrap; align-items:baseline; gap:.06em .3em;
-  margin-top:clamp(30px,4vw,54px); max-width:min(100%,20em);
-}
 /* "niche highlight krwade bade bade shabd" - these were 11px mono pills and
    read as metadata. Set as display words they carry the same weight as the
-   client names above them, which is the point: the range IS the credential. */
-.niche{
+   client names above them, which is the point: the range IS the credential.
+
+   These are a SENTENCE, so they are laid out as prose, not as a flex row.
+   Flex was the bug behind "ye system alag hi ganda sa dikh raha": the column
+   gap (.3em) stacked on top of the comma's own margin (.26em), so every word
+   pair sat ~.56em apart while the comma stayed welded to the word before it -
+   giving that ragged "Footwear,   Supplements," look on both phone and laptop.
+   Normal inline flow spaces words once, uniformly, and wraps like text. */
+.niches{
+  margin-top:clamp(30px,4vw,54px); max-width:min(100%,21em);
   font-family:var(--f-disp); font-weight:400; text-transform:none;
-  font-size:clamp(21px,2.5vw,38px); line-height:1.06; letter-spacing:-.022em;
-  border:0; border-radius:0; padding:0; color:var(--ink);
-  transition:color .35s var(--ease), transform .45s var(--expo);
+  font-size:clamp(21px,2.5vw,38px); line-height:1.08; letter-spacing:-.022em;
+  color:var(--ink); text-wrap:pretty;
+}
+.niche{
+  border:0; border-radius:0; padding:0;
+  transition:color .35s var(--ease);
 }
 /* a middot separator dangles at the end of a wrapped line and reads as a typo;
-   a comma is what prose does there, and these now ARE a sentence */
-.niche::after{ content:","; color:var(--ink-3); margin-right:.26em; }
-.niche:last-child::after{ content:"."; color:var(--ink-3); margin-right:0; }
+   a comma is what prose does there, and these now ARE a sentence. No margin -
+   the single space between spans in the markup does the spacing. */
+.niche::after{ content:","; color:var(--ink-3); }
+.niche:last-child::after{ content:"."; color:var(--ink-3); }
 @media (hover:hover) and (pointer:fine){
-  .niche:hover{ color:var(--accent); transform:translateY(-2px); }
+  .niche:hover{ color:var(--accent); }
 }
 
 .mkt{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:6px; overflow:hidden; margin-top:clamp(28px,3.6vw,52px); }
@@ -1147,11 +1175,17 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
       <p class="sr">The range matters less than the pattern.</p>
 
       <div class="niches">
-        <span class="niche">Men's clothing</span><span class="niche">Women's clothing</span>
-        <span class="niche">Footwear</span><span class="niche">Supplements</span>
-        <span class="niche">Skincare</span><span class="niche">Beauty</span>
-        <span class="niche">Jewellery</span><span class="niche">Lingerie &amp; sleepwear</span>
-        <span class="niche">Apparel</span><span class="niche">Spa &amp; wellness</span><span class="niche">Travel</span>
+        <span class="niche">Men's clothing</span>
+        <span class="niche">Women's clothing</span>
+        <span class="niche">Footwear</span>
+        <span class="niche">Supplements</span>
+        <span class="niche">Skincare</span>
+        <span class="niche">Beauty</span>
+        <span class="niche">Jewellery</span>
+        <span class="niche">Lingerie &amp; sleepwear</span>
+        <span class="niche">Apparel</span>
+        <span class="niche">Spa &amp; wellness</span>
+        <span class="niche">Travel</span>
       </div>
 
       <p class="mkt__line fade"><b>US &amp; UK</b> is where most of the work sits. One brand run in
@@ -1177,10 +1211,10 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           <li class="cell" style="--i:0">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/norvia-poster.webp" aria-label="Silent preview of a Norvia ad — a phone on a desk under the line “brain still buffering”">
-                <source src="assets/reel/norvia.mp4" type="video/mp4">
+                     poster="assets/reel/broll-poster.webp" aria-label="Silent preview — generated b-roll of a model turning in a burgundy slip dress">
+                <source src="assets/reel/broll.mp4" type="video/mp4">
               </video>
-              <figcaption><b>Norvia</b><span>Live action + animation</span></figcaption>
+              <figcaption><b>AI b-roll</b><span>Generated product motion</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:1">
@@ -1222,10 +1256,10 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           <li class="cell" style="--i:5">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/broll-poster.webp" aria-label="Silent preview — generated b-roll of a model turning in a burgundy slip dress">
-                <source src="assets/reel/broll.mp4" type="video/mp4">
+                     poster="assets/reel/norvia-poster.webp" aria-label="Silent preview of a Norvia ad — a phone on a desk under the line “brain still buffering”">
+                <source src="assets/reel/norvia.mp4" type="video/mp4">
               </video>
-              <figcaption><b>AI b-roll</b><span>Generated product motion</span></figcaption>
+              <figcaption><b>Norvia</b><span>Live action + animation</span></figcaption>
             </figure>
           </li>
           </ul>
