@@ -705,6 +705,31 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   .strip__link:hover svg{ transform:translate(3px,-3px); }
 }
 
+/* Screenshots arrive at every aspect ratio (a 10:1 ROAS table next to a square
+   testimonial). Contain them on a plate instead of cropping: a cropped table
+   proves nothing, and a consistent plate keeps the strip's rhythm. */
+.tile--shot{
+  width:clamp(250px,27vw,380px); height:clamp(180px,20vw,268px);
+  padding:12px; overflow:hidden;
+  border:1px solid var(--night-rule); border-radius:5px; background:var(--night-2);
+  transition:border-color .5s var(--ease), transform .75s var(--expo);
+}
+/* Two traps here. .tile img sets a fixed height and is declared later at the
+   same specificity, so this needs the extra class to win. And max-height:100%
+   silently does nothing on a grid item whose row is content-sized, which let
+   the tall screenshots grow past the plate - so the image fills the box and
+   object-fit does the containing instead. */
+.tile.tile--shot img{
+  width:100%; height:100%; object-fit:contain; object-position:center;
+  aspect-ratio:auto; border:0; background:none;
+  display:block; border-radius:2px;
+  filter:saturate(.94) brightness(.95); transition:filter .6s var(--ease);
+}
+@media (hover:hover) and (pointer:fine){
+  .tile--shot:hover{ border-color:var(--night-ink2); transform:translateY(-6px); }
+  .tile.tile--shot:hover img{ filter:none; }
+}
+
 /* video cells sit in the same strip as the stills, just 9:16 */
 .tile--v{ position:relative; }
 .tile--v .reel__v{
@@ -856,6 +881,15 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 
 .mkt{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:6px; overflow:hidden; margin-top:clamp(28px,3.6vw,52px); }
 @media (max-width:640px){ .mkt{ grid-template-columns:1fr; } }
+/* "You promise a pattern and never give it" - the section listed the range and
+   never said what ties it together. This is the sentence that cashes it. */
+.niches__pay{
+  margin:clamp(22px,2.8vw,38px) 0 0; max-width:34ch;
+  font-family:var(--f-disp); font-weight:400; font-size:clamp(21px,2.3vw,34px);
+  line-height:1.16; letter-spacing:-.02em; color:var(--ink);
+}
+.niches__pay em{ font-style:italic; color:var(--accent); }
+
 .mkt__line{
   margin:clamp(26px,3.2vw,44px) 0 0; max-width:62ch;
   font-size:clamp(15px,1.25vw,19px); color:var(--ink-2);
@@ -1092,8 +1126,8 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
       </div>
 
       <div class="stats">
-        <div class="stat fade gate" style="--d:1280ms"><div class="stat__n"><span data-count="2">0</span><sup>+</sup></div><div class="stat__l">Years making ads</div></div>
-        <div class="stat fade gate" style="--d:1390ms"><div class="stat__n"><span data-count="8">0</span><sup>+</sup></div><div class="stat__l">Named brands</div></div>
+        <div class="stat fade gate" style="--d:1280ms"><div class="stat__n">$<span data-count="150">0</span>K<sup>+</sup></div><div class="stat__l">Ad spend behind the creative I made</div></div>
+        <div class="stat fade gate" style="--d:1390ms"><div class="stat__n"><span data-count="15">0</span><sup>+</sup></div><div class="stat__l">Brands</div></div>
         <div class="stat fade gate" style="--d:1500ms"><div class="stat__n"><span data-count="11">0</span></div><div class="stat__l">Niches shipped</div></div>
       </div>
 
@@ -1131,11 +1165,13 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
         <div class="intro__body">
           <p class="fade">
             I run the whole creative for <b>DTC brands</b> — AI ads, UGC, VSLs, product ads, image ads.
-            Been at it over two years with brands, creators and agency owners, mostly
-            <b>fashion, supplements, apparel, skincare, footwear</b> and spa/wellness.
+            The angle and the script are mine too, not just the edit. <b>$150K+ in ad spend</b>
+            behind the creative I made.
           </p>
           <p class="fade" style="--d:160ms">
-            Then studying — YouTube, plus <span class="mark">Ecom Talent and Evolve</span>. Not the other way round.
+            Brands, creators and agency owners — <b>fashion, supplements, apparel, skincare,
+            footwear, spa/wellness.</b> Then studying — YouTube, plus Ecom Talent and Evolve.
+            Not the other way round.
           </p>
         </div>
       </div>
@@ -1198,6 +1234,9 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
         <span class="niche">Travel</span>
       </div>
 
+      <p class="niches__pay fade">Every one of these is a product someone has to <em>feel</em>
+        something about before they buy. That's the part I'm good at.</p>
+
       <p class="mkt__line fade"><b>US &amp; UK</b> is where most of the work sits. One brand run in
         <b>Norwegian</b>; campaigns shipped in <b>Swedish</b>, inside SEK ad accounts.</p>
     </div>
@@ -1221,55 +1260,57 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           <li class="cell" style="--i:0">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/broll-poster.webp" aria-label="Silent preview — generated b-roll of a model turning in a burgundy slip dress">
-                <source src="assets/reel/broll.mp4" type="video/mp4">
+                     poster="assets/reel/ai-first-poster.webp" aria-label="Silent preview of an AI-generated ad">
+                <source src="assets/reel/ai-first.mp4" type="video/mp4">
               </video>
-              <figcaption><b>AI b-roll</b><span>Generated product motion</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:1">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/ai-ugc3-poster.webp" aria-label="Silent preview — an AI-generated creator seated on a European street talking about a Fitflex tee">
-                <source src="assets/reel/ai-ugc3.mp4" type="video/mp4">
+                     poster="assets/reel/norvia-poster.webp" aria-label="Silent preview of an AI-generated ad">
+                <source src="assets/reel/norvia.mp4" type="video/mp4">
               </video>
-              <figcaption><b>Fitflex</b><span>Generated creator, on location</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:2">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/ugc-poster.webp" aria-label="Silent preview — an AI-generated creator on a beach front presenting a t-shirt">
-                <source src="assets/reel/ugc.mp4" type="video/mp4">
+                     poster="assets/reel/ai-ugc3-poster.webp" aria-label="Silent preview of an AI-generated ad">
+                <source src="assets/reel/ai-ugc3.mp4" type="video/mp4">
               </video>
-              <figcaption><b>AI creator</b><span>Apparel, shot as UGC</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:3">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/ai-ugc2-poster.webp" aria-label="Silent preview — an AI-generated creator against a studio backdrop demonstrating fit and sizing">
-                <source src="assets/reel/ai-ugc2.mp4" type="video/mp4">
+                     poster="assets/reel/ugc-poster.webp" aria-label="Silent preview of an AI-generated ad">
+                <source src="assets/reel/ugc.mp4" type="video/mp4">
               </video>
-              <figcaption><b>AI creator</b><span>Fit and sizing demo</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:4">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/ai-animated2-poster.webp" aria-label="Silent preview — a generated scene of a hunting jacket on a rail with the price tag still on">
-                <source src="assets/reel/ai-animated2.mp4" type="video/mp4">
+                     poster="assets/reel/ai-ugc2-poster.webp" aria-label="Silent preview of an AI-generated ad">
+                <source src="assets/reel/ai-ugc2.mp4" type="video/mp4">
               </video>
-              <figcaption><b>AI scene</b><span>Closet angle, generated</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:5">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/norvia-poster.webp" aria-label="Silent preview of a Norvia ad — a phone on a desk under the line “brain still buffering”">
-                <source src="assets/reel/norvia.mp4" type="video/mp4">
+                     poster="assets/reel/ai-animated2-poster.webp" aria-label="Silent preview of an AI-generated ad">
+                <source src="assets/reel/ai-animated2.mp4" type="video/mp4">
               </video>
-              <figcaption><b>Norvia</b><span>Live action + animation</span></figcaption>
+            </figure>
+          </li>
+          <li class="cell" style="--i:6">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/broll-poster.webp" aria-label="Silent preview of an AI-generated ad">
+                <source src="assets/reel/broll.mp4" type="video/mp4">
+              </video>
             </figure>
           </li>
           </ul>
@@ -1290,10 +1331,10 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           <li class="cell" style="--i:0">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/taos-poster.webp" aria-label="Silent preview of a Taos ad — shoes worn with leopard-print trousers">
-                <source src="assets/reel/taos.mp4" type="video/mp4">
+                     poster="assets/reel/royalcanadian-poster.webp" aria-label="Silent preview of a Royal Canadian ad — a Cambridge boot box being opened">
+                <source src="assets/reel/royalcanadian.mp4" type="video/mp4">
               </video>
-              <figcaption><b>Taos</b><span>Footwear</span></figcaption>
+              <figcaption><b>Royal Canadian</b><span>Footwear</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:1">
@@ -1308,31 +1349,22 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
           <li class="cell" style="--i:2">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/royalcanadian-poster.webp" aria-label="Silent preview of a Royal Canadian ad — a Cambridge boot box being opened">
-                <source src="assets/reel/royalcanadian.mp4" type="video/mp4">
-              </video>
-              <figcaption><b>Royal Canadian</b><span>Footwear</span></figcaption>
-            </figure>
-          </li>
-          <li class="cell" style="--i:3">
-            <figure class="tile tile--v">
-              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/southwind-poster.webp" aria-label="Silent preview of a Southwind Apparel ad — a patterned dress worn against a brick wall">
+                     poster="assets/reel/southwind-poster.webp" aria-label="Silent preview of a Southwind Apparel ad — a dress worn against a brick wall">
                 <source src="assets/reel/southwind.mp4" type="video/mp4">
               </video>
               <figcaption><b>Southwind Apparel</b><span>Apparel</span></figcaption>
             </figure>
           </li>
-          <li class="cell" style="--i:4">
+          <li class="cell" style="--i:3">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/serenity-poster.webp" aria-label="Silent preview of a Serenity Studio ad — a walk through the Miami content studio">
-                <source src="assets/reel/serenity.mp4" type="video/mp4">
+                     poster="assets/reel/taos-poster.webp" aria-label="Silent preview of a Taos ad — shoes worn with leopard-print trousers">
+                <source src="assets/reel/taos.mp4" type="video/mp4">
               </video>
-              <figcaption><b>Serenity Studio</b><span>Spa & studio</span></figcaption>
+              <figcaption><b>Taos</b><span>Footwear</span></figcaption>
             </figure>
           </li>
-          <li class="cell" style="--i:5">
+          <li class="cell" style="--i:4">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
                      poster="assets/reel/fabulove-poster.webp" aria-label="Silent preview of a FabuLove ad — a creator showing a necklace to camera">
@@ -1341,13 +1373,22 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
               <figcaption><b>FabuLove</b><span>Jewellery</span></figcaption>
             </figure>
           </li>
+          <li class="cell" style="--i:5">
+            <figure class="tile tile--v">
+              <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
+                     poster="assets/reel/elyra-poster.webp" aria-label="Silent preview of an Elyra ad — a creator presenting a padded bra to camera">
+                <source src="assets/reel/elyra.mp4" type="video/mp4">
+              </video>
+              <figcaption><b>Elyra</b><span>Lingerie</span></figcaption>
+            </figure>
+          </li>
           <li class="cell" style="--i:6">
             <figure class="tile tile--v">
               <video class="reel__v" muted loop playsinline preload="none" width="460" height="818"
-                     poster="assets/reel/cloudly-poster.webp" aria-label="Silent preview of a Cloudly Footwear ad — an insole held up to camera">
-                <source src="assets/reel/cloudly.mp4" type="video/mp4">
+                     poster="assets/reel/serenity-poster.webp" aria-label="Silent preview of a Serenity Studio ad — a walk through the Miami content studio">
+                <source src="assets/reel/serenity.mp4" type="video/mp4">
               </video>
-              <figcaption><b>Cloudly Footwear</b><span>Footwear</span></figcaption>
+              <figcaption><b>Serenity Studio</b><span>Spa & studio</span></figcaption>
             </figure>
           </li>
           <li class="cell" style="--i:7">
@@ -1464,17 +1505,104 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
         <h2><span class="rv"><i>What it <em>did.</em></i></span></h2>
       </div>
 
-      <div class="proof">
-        <a class="proof__card fade" data-fmt="res" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1vWS1MWr6DaVEkorCtVRAsMog-j8YjtJf">
-          <span class="proof__k">Results <b>ROAS</b></span>
-          <span class="proof__t">Account screenshots from the campaigns behind the creative.</span>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
-        <a class="proof__card fade" style="--d:90ms" data-fmt="said" data-cur="Open ↗" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/17rSJGVdX1iyr3dRw5hpMuHEPmliIKJrw">
-          <span class="proof__k">Nice things <b>clients said</b></span>
-          <span class="proof__t">Unedited messages, straight out of the chats.</span>
-          <span class="row__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
-        </a>
+      <div class="strip fade">
+        <div class="sheet__top">
+          <p class="sheet__k">Results — ROAS</p>
+          <p class="sheet__hint"><span>Scroll</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></p>
+        </div>
+        <div class="sheet__scroll" tabindex="0" role="region" aria-label="Ad account results">
+          <ul class="sheet__strip">
+          <li class="cell" style="--i:0">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/roas-1.webp" loading="lazy" decoding="async" alt="Meta Ads Manager — ad-level ROAS and spend across 139 ads, in kr">
+            </figure>
+          </li>
+          <li class="cell" style="--i:1">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/roas-2.webp" loading="lazy" decoding="async" alt="Meta Ads Manager — adds to cart, cost per add to cart, spend and purchase ROAS by row">
+            </figure>
+          </li>
+          <li class="cell" style="--i:2">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/roas-3.webp" loading="lazy" decoding="async" alt="Meta Ads Manager — spend, unique outbound clicks and purchase ROAS by row">
+            </figure>
+          </li>
+          <li class="cell" style="--i:3">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/roas-4.webp" loading="lazy" decoding="async" alt="Meta Ads Manager — website purchases against spend">
+            </figure>
+          </li>
+          <li class="cell" style="--i:4">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/roas-5.webp" loading="lazy" decoding="async" alt="Meta Ads Manager — results, cost per result, adds to cart, spend and purchase ROAS">
+            </figure>
+          </li>
+          </ul>
+        </div>
+        <div class="strip__foot">
+          <p class="strip__note">Straight out of Meta Ads Manager. Spend, purchases and return, on the campaigns behind the creative above.</p>
+          <a class="strip__link" href="https://drive.google.com/drive/folders/1vWS1MWr6DaVEkorCtVRAsMog-j8YjtJf" target="_blank" rel="noopener" data-cur="Open ↗">Open the results folder<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
+      </div>
+
+      <div class="strip fade">
+        <div class="sheet__top">
+          <p class="sheet__k">Nice things clients said</p>
+          <p class="sheet__hint"><span>Scroll</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></p>
+        </div>
+        <div class="sheet__scroll" tabindex="0" role="region" aria-label="Client messages">
+          <ul class="sheet__strip">
+          <li class="cell" style="--i:0">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-mariah.webp" loading="lazy" decoding="async" alt="A written recommendation from Mariah Lukashewich of NextLvl Creatives about working with Rohan as her UGC video editor">
+            </figure>
+          </li>
+          <li class="cell" style="--i:1">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-gio.webp" loading="lazy" decoding="async" alt="A message from Gio White calling Rohan a total pro who turns raw footage into polished, high-performing paid social ads">
+            </figure>
+          </li>
+          <li class="cell" style="--i:2">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-wa1.webp" loading="lazy" decoding="async" alt="A chat message calling a second batch of work really solid and beautiful">
+            </figure>
+          </li>
+          <li class="cell" style="--i:3">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-agency.webp" loading="lazy" decoding="async" alt="An email from an agency saying the work looks amazing and they are excited to work together">
+            </figure>
+          </li>
+          <li class="cell" style="--i:4">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-sam.webp" loading="lazy" decoding="async" alt="A message calling the cut some of Rohan's best work">
+            </figure>
+          </li>
+          <li class="cell" style="--i:5">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-rachel.webp" loading="lazy" decoding="async" alt="A message from Rachel Matulle saying she loves the work">
+            </figure>
+          </li>
+          <li class="cell" style="--i:6">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-wa2.webp" loading="lazy" decoding="async" alt="A message from a creator saying they have a lot of collabs to film and want to work with Rohan on them">
+            </figure>
+          </li>
+          <li class="cell" style="--i:7">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-brand1.webp" loading="lazy" decoding="async" alt="A message from a brand owner about the delivered edits">
+            </figure>
+          </li>
+          <li class="cell" style="--i:8">
+            <figure class="tile tile--shot">
+              <img src="assets/proof/said-marissa.webp" loading="lazy" decoding="async" alt="A message from Marissa Ciancitto saying Rohan picked up her style much quicker than past editors">
+            </figure>
+          </li>
+          </ul>
+        </div>
+        <div class="strip__foot">
+          <p class="strip__note">Unedited messages, straight out of the chats and inboxes.</p>
+          <a class="strip__link" href="https://drive.google.com/drive/folders/17rSJGVdX1iyr3dRw5hpMuHEPmliIKJrw" target="_blank" rel="noopener" data-cur="Open ↗">Open the testimonials folder<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
       </div>
 
     </div>

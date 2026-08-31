@@ -63,6 +63,17 @@ for (const f of workFiles) {
 const inlineWork = (html) =>
   html.replace(/assets\/work\/([A-Za-z0-9_-]+\.webp)/g, (m, f) => workData[f] || m);
 
+/* ROAS and testimonial screenshots. */
+const proofFiles = (await readdir(p('assets/proof')).catch(() => []))
+  .filter((f) => f.endsWith('.webp'));
+const proofData = {};
+for (const f of proofFiles) {
+  const buf = await readFile(p('assets/proof', f));
+  proofData[f] = `data:image/webp;base64,${buf.toString('base64')}`;
+}
+const inlineProof = (html) =>
+  html.replace(/assets\/proof\/([A-Za-z0-9_-]+\.webp)/g, (m, f) => proofData[f] || m);
+
 /* Motion peek. Poster frames are inlined so the single-file build still shows
    the clips as stills; the .mp4s are NOT inlined — they would add megabytes to
    a file whose whole point is being emailable. Offline, the posters stand in. */
@@ -85,7 +96,7 @@ ${inner}
 `;
 
 const local  = body.replace('__FONTFACE__', await fontBlock(false));
-const inlined = inlinePosters(inlineWork(body.replace('__FONTFACE__', await fontBlock(true))));
+const inlined = inlineProof(inlinePosters(inlineWork(body.replace('__FONTFACE__', await fontBlock(true)))));
 
 await writeFile(p('index.html'), shell(local), 'utf8');
 await mkdir(p('dist'), { recursive: true });
@@ -98,6 +109,10 @@ await writeFile(p('_site/index.html'), shell(local), 'utf8');
 for (const f of workFiles) {
   await mkdir(p('_site/assets/work'), { recursive: true });
   await copyFile(p('assets/work', f), p('_site/assets/work', f));
+}
+for (const f of proofFiles) {
+  await mkdir(p('_site/assets/proof'), { recursive: true });
+  await copyFile(p('assets/proof', f), p('_site/assets/proof', f));
 }
 for (const f of reelFiles) {
   await mkdir(p('_site/assets/reel'), { recursive: true });
@@ -114,4 +129,4 @@ const kb = (s) => (Buffer.byteLength(s) / 1024).toFixed(0) + ' KB';
 console.log('built  index.html                 ' + kb(shell(local)) + '  (+ assets/)');
 console.log('built  dist/rohan-falwariya.html  ' + kb(shell(inlined)) + '  self-contained');
 console.log('built  dist/artifact-body.html    ' + kb(inlined));
-console.log('built  _site/                     index.html + ' + fontCount + ' fonts + ' + workFiles.length + ' stills + ' + reelFiles.length + ' reel files  (Netlify publish dir)');
+console.log('built  _site/                     index.html + ' + fontCount + ' fonts + ' + workFiles.length + ' stills + ' + reelFiles.length + ' reel + ' + proofFiles.length + ' proof  (Netlify publish dir)');
