@@ -240,9 +240,66 @@ production access behind 20+ domains / $50 balance / $50 spent in 2 years, and
 whitelists by IPv4 — which breaks every time a residential IP rotates. Neither
 the Netlify nor the Namecheap MCP exposes DNS tools, so DNS stays a UI job.
 
+---
+
+## Session 4 — domain move to rohanmadeit.com, 4 Sep 2026
+
+**Live: https://rohanmadeit.com** (was `rohanfalwariya.com`).
+
+Rohan bought `rohanmadeit.com` on Wix and wanted it as the real address, with
+`rohanfalwariya.com` freed up for a different site.
+
+### Final shape
+
+| Domain | Serves |
+|---|---|
+| `rohanmadeit.com` | this portfolio · Netlify project `rohanmadeit` · Ritik's account |
+| `rohanfalwariya.com` | 302 -> `/soxi`, a **different** Netlify site on a different account |
+
+DNS for `rohanmadeit.com` was set through the **Wix Domain DNS API** (`PATCH
+/domains/v1/dns-zones/{domain}`): `A -> 75.2.60.5`, `CNAME www ->
+rohanmadeit.netlify.app`. Wix nameservers stay in place.
+
+### The bug that ate most of the session
+
+Netlify showed "Netlify DNS" for `rohanmadeit.com` and the cert kept failing with
+`RateLimited: too many failed authorizations (5) for "*.rohanmadeit.com"`. The
+site sat on plain HTTP.
+
+Cause: **Wix never permits nameserver changes on domains registered with them.**
+Netlify DNS mode therefore attempts a *wildcard* cert, wildcards can only use
+DNS-01, and Netlify was writing `_acme-challenge` TXT into a zone nobody queries
+(`NXDOMAIN` confirmed it). Every attempt failed; five failures triggered the
+rate limit.
+
+Fix: **delete the Netlify DNS zone**, leaving the domain on external DNS. Netlify
+fell back to HTTP-01 and issued a non-wildcard cert on its own — the Renew button
+was never pressed. See AGENTS.md for the diagnostic commands.
+
+### Two things I got wrong, recorded so they aren't repeated
+
+1. **"Wix is overriding your apex."** It wasn't. The API write was correct and
+   simply took ~24h to propagate, while the `www` CNAME went live immediately.
+   I called it an override after three checks inside ten minutes and sent Ritik
+   toward a domain transfer he didn't need. Subdomain and apex records can
+   propagate at very different speeds — wait a day before concluding.
+2. **"Paste Netlify's nameservers into Wix."** Wix does not allow this at all.
+   I gave that step before checking whether the platform permitted it.
+
+### Wix API notes
+
+Key lives in `.wix.env` (**gitignored** — the repo is public). Confirmed working:
+`GET`/`PATCH /domains/v1/dns-zones/{domain}` with `Authorization: <key>` and
+`wix-account-id`. Writes A/CNAME/MX/TXT/NS fine. There is **no** nameserver or
+un-park method — the whole Domains surface is DNS zones, connected domains, and
+search. A pre-change snapshot of the zone is in the scratchpad for rollback.
+
+Netlify's MCP has no domain operations either: adding a domain, setting primary,
+force-HTTPS and deleting a DNS zone are all UI-only.
+
 ## Where things stand / what's next
 
-- [x] ~~Point a domain at it~~ — live at **https://rohanfalwariya.com**, Netlify DNS, auto-deploying from `main`.
+- [x] ~~Point a domain at it~~ — live at **https://rohanmadeit.com**, external DNS, auto-deploying from `main`.
 - [ ] Fix the email typo in the source PDF.
 - [ ] Consider swapping the "Results (ROAS)" folder for 2–3 real screenshots
       embedded on the page — a client shouldn't have to click into Drive to see

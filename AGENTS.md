@@ -41,7 +41,7 @@ Edit `src/page.html` and re-run the build.
 
 ## Deploy
 
-**Live: https://rohanfalwariya.com** — continuous deployment, no manual step.
+**Live: https://rohanmadeit.com** — continuous deployment, no manual step.
 
 ```
 edit src/page.html  ->  node build.mjs  ->  git commit  ->  git push  ->  live in ~1 min
@@ -50,23 +50,48 @@ edit src/page.html  ->  node build.mjs  ->  git commit  ->  git push  ->  live i
 | Piece | Value |
 |---|---|
 | Repo | `github.com/ritik-dev/rohan-falwariya` (public, branch `main`) |
-| Netlify project | `rohan-falwariya` · site id `0a2abe11-d343-4c94-861c-79b150fb658b` |
+| Netlify project | `rohanmadeit` · site id `0a2abe11-d343-4c94-861c-79b150fb658b` |
 | Build command | `node build.mjs` (from `netlify.toml`, which overrides the UI) |
 | Publish dir | `_site/` |
-| DNS | Netlify DNS — nameservers delegated to `dns[1-4].p01.nsone.net` |
-| Certificate | Let's Encrypt, auto-renewed. HSTS on, `http` and `www` both 301 to apex |
+| Registrar | **Wix** (domain bought there) |
+| DNS mode | **External DNS** — nameservers stay `ns2/ns3.wixdns.net` |
+| Records | `A rohanmadeit.com -> 75.2.60.5` · `CNAME www -> rohanmadeit.netlify.app` |
+| Certificate | Let's Encrypt, **non-wildcard**, HTTP-01 validated |
+
+### Do not switch this domain to Netlify DNS
+
+It looks like the tidier option and it **cannot work.** Wix does not allow changing
+nameservers on domains registered with them — no setting, no support request, no
+exception. Selecting Netlify DNS makes Netlify attempt a wildcard cert
+(`*.rohanmadeit.com`), and wildcards can only be validated by DNS-01: Netlify
+writes `_acme-challenge` TXT records into a Netlify zone that nothing on the
+internet queries, Let's Encrypt sees `NXDOMAIN`, and after five failures the
+account is rate-limited for an hour. The site sits on plain HTTP the whole time.
+
+External DNS is the correct mode here. Netlify falls back to HTTP-01, fetches a
+file over HTTP from `75.2.60.5`, and issues immediately.
+
+Diagnosing it again, if it recurs:
+
+```bash
+nslookup -type=NS rohanmadeit.com 8.8.8.8              # must be wixdns -> external DNS
+nslookup -type=TXT _acme-challenge.rohanmadeit.com 8.8.8.8   # NXDOMAIN = DNS-01 can't work
+```
+
+**`rohanfalwariya.com` is no longer this site's domain.** It was moved to a
+separate Netlify site (different account) and now 302s to `/soxi`. Don't re-add it.
 
 **`_site/` is why source files are not on the public web.** The repo is public, but
 Netlify serves only `_site/` — `index.html` plus `assets/`. Publishing the repo
 root instead would put `src/`, `chats.md`, `prompts/` and `reference/rohan-deck.pdf`
-one guessed URL away. Verified: those paths all return 404 in production.
+one guessed URL away. Verified in production: those all return 404.
 
 If you ever change the publish dir, re-check that:
 
 ```bash
-for u in src/page.html chats.md reference/rohan-deck.pdf; do
+for u in src/page.html chats.md reference/rohan-deck.pdf .wix.env; do
   curl -s -o /dev/null -w "$u %{http_code}
-" "https://rohanfalwariya.com/$u"
+" "https://rohanmadeit.com/$u"
 done   # every one must be 404
 ```
 
