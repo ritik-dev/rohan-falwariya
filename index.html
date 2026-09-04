@@ -1126,7 +1126,7 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
       </div>
 
       <div class="stats">
-        <div class="stat fade gate" style="--d:1280ms"><div class="stat__n">$<span data-count="150">0</span>K<sup>+</sup></div><div class="stat__l">Ad spend behind the creative I made</div></div>
+        <div class="stat fade gate" style="--d:1280ms"><div class="stat__n">$<span data-count="1.5">0.0</span>M<sup>+</sup></div><div class="stat__l">Ad spend behind the creative I made</div></div>
         <div class="stat fade gate" style="--d:1390ms"><div class="stat__n"><span data-count="15">0</span><sup>+</sup></div><div class="stat__l">Brands</div></div>
         <div class="stat fade gate" style="--d:1500ms"><div class="stat__n"><span data-count="11">0</span></div><div class="stat__l">Niches shipped</div></div>
       </div>
@@ -1856,12 +1856,14 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
   if (tick) tick.innerHTML = tick.innerHTML + tick.innerHTML;
 
   function runCount(el) {
-    var end = parseInt(el.getAttribute('data-count'), 10) || 0;
-    if (reduce) { el.textContent = end; return; }
+    var raw = el.getAttribute('data-count') || '0';
+    var end = parseFloat(raw) || 0;
+    var dp = (raw.split('.')[1] || '').length;   // 1.5 -> 1 decimal, 15 -> 0
+    if (reduce) { el.textContent = end.toFixed(dp); return; }
     var s = performance.now(), dur = 1200;
     (function step(now) {
       var p = Math.min((now - s) / dur, 1);
-      el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3)));
+      el.textContent = (end * (1 - Math.pow(1 - p, 3))).toFixed(dp);
       if (p < 1) requestAnimationFrame(step);
     })(s);
   }
