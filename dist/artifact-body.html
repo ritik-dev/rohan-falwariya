@@ -646,11 +646,40 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
 
 .sheet__scroll{
   overflow-x:auto; overflow-y:hidden; scroll-snap-type:x proximity;
-  scrollbar-width:none; -ms-overflow-style:none;
   /* bleed to the page edge so the roll runs out of frame instead of stopping */
   margin-inline:calc(var(--gut) * -1); padding-inline:var(--gut);
+  /* A visible bar is the only affordance a trackpad user gets for free. It was
+     hidden before, which left no indication the strip scrolled at all. */
+  scrollbar-width:thin; scrollbar-color:var(--night-rule) transparent;
+  overscroll-behavior-x:contain;
 }
-.sheet__scroll::-webkit-scrollbar{ display:none; }
+.sheet__scroll::-webkit-scrollbar{ height:7px; }
+.sheet__scroll::-webkit-scrollbar-track{ background:transparent; }
+.sheet__scroll::-webkit-scrollbar-thumb{ background:var(--night-rule); border-radius:99px; }
+@media (hover:hover) and (pointer:fine){
+  .sheet__scroll{ cursor:grab; }
+  .sheet__scroll.is-dragging{ cursor:grabbing; scroll-snap-type:none; user-select:none; }
+  .sheet__scroll.is-dragging a{ pointer-events:none; }
+  .sheet__scroll::-webkit-scrollbar-thumb:hover{ background:var(--night-ink2); }
+}
+
+/* prev / next — the affordance for a mouse with no horizontal wheel */
+.sheet__nav{ display:inline-flex; gap:8px; margin-left:16px; vertical-align:middle; }
+.sheet__nav button{
+  width:34px; height:34px; border:1px solid var(--night-rule); border-radius:50%;
+  display:grid; place-items:center; color:var(--night-ink2); flex:none;
+  transition:background-color .35s var(--ease), color .35s var(--ease),
+             border-color .35s var(--ease), opacity .35s var(--ease);
+}
+.sheet__nav button svg{ width:14px; height:14px; }
+.sheet__nav button[disabled]{ opacity:.25; cursor:default; }
+@media (hover:hover) and (pointer:fine){
+  .sheet__nav button:not([disabled]):hover{
+    background:var(--night-acc); border-color:var(--night-acc); color:var(--night);
+  }
+}
+/* touch already swipes — the arrows would just eat space */
+@media (max-width:700px){ .sheet__nav{ display:none; } }
 .sheet__scroll:focus-visible{ outline:2px solid var(--night-acc); outline-offset:6px; }
 .sheet__strip{
   list-style:none; margin:0; padding:2px 0 6px; display:flex; align-items:flex-start;
@@ -1686,7 +1715,14 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     if (!SS.on) return;
     if (SS.locked) { e.preventDefault(); return; }
     if (e.ctrlKey) return;                       // let pinch-zoom through
-    if (e.target.closest && e.target.closest('.trk__wrap')) return;
+    if (e.target.closest) {
+      if (e.target.closest('.trk__wrap')) return;
+      /* The horizontal strips own horizontal intent — a trackpad two-finger
+         swipe (deltaX) or shift+wheel. Without this the preventDefault() below
+         swallows it and the strip cannot be scrolled at all on a laptop. */
+      var hz = e.target.closest('.sheet__scroll');
+      if (hz && (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey)) return;
+    }
     e.preventDefault();
     var d = e.deltaY * (e.deltaMode === 1 ? 18 : e.deltaMode === 2 ? innerHeight : 1);
     SS.target = Math.max(0, Math.min(maxY(), SS.target + d));
@@ -1997,6 +2033,85 @@ html.is-ready .gate .rv > i, html.is-ready .gate.fade{ transition-delay:var(--d,
     }, { rootMargin: '80px 0px', threshold: 0.25 });
     reels.forEach(function (v) { rio.observe(v); });
   }
+
+  /* ============ 8d · horizontal strips: reachable without a wheel ============ */
+  /* These strips scroll sideways. On a phone you swipe them. On a desktop the
+     only thing that worked was a mouse with horizontal tilt or middle-click
+     autoscroll — a laptop trackpad got nothing, because the global wheel
+     handler in section 1 called preventDefault() on every event. That is fixed
+     there; this adds the two affordances a pointer user still needs: drag, and
+     explicit arrows. Keyboard already works — each strip is tabbable with
+     role="region", so the arrow keys scroll it natively. */
+  var ARROW = 'M4 12h15M13 6l6 6-6 6';
+
+  doc.querySelectorAll('.sheet__scroll').forEach(function (sc) {
+    var step = function () {
+      var cell = sc.querySelector('.cell');
+      if (!cell) return Math.round(sc.clientWidth * 0.8);
+      var gap = parseFloat(getComputedStyle(sc.querySelector('.sheet__strip')).columnGap) || 16;
+      return Math.round(cell.getBoundingClientRect().width + gap);
+    };
+
+    /* ---- prev / next ---- */
+    var top = sc.parentElement.querySelector('.sheet__top');
+    var prev, next;
+    if (top) {
+      var nav = doc.createElement('span');
+      nav.className = 'sheet__nav';
+      nav.innerHTML =
+        '<button type="button" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" ' +
+        'stroke="currentColor" stroke-width="1.7" style="transform:rotate(180deg)" aria-hidden="true">' +
+        '<path d="' + ARROW + '"/></svg></button>' +
+        '<button type="button" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" ' +
+        'stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="' + ARROW + '"/></svg></button>';
+      top.appendChild(nav);
+      prev = nav.firstChild; next = nav.lastChild;
+      prev.addEventListener('click', function () { sc.scrollBy({ left: -step(), behavior: reduce ? 'auto' : 'smooth' }); });
+      next.addEventListener('click', function () { sc.scrollBy({ left:  step(), behavior: reduce ? 'auto' : 'smooth' }); });
+    }
+
+    function sync() {
+      if (!prev) return;
+      var max = sc.scrollWidth - sc.clientWidth;
+      prev.disabled = sc.scrollLeft <= 2;
+      next.disabled = sc.scrollLeft >= max - 2;
+    }
+    sc.addEventListener('scroll', sync, { passive: true });
+    addEventListener('resize', sync);
+    sync();
+
+    /* ---- drag to scroll (fine pointers only; touch already swipes) ---- */
+    if (!fine) return;
+    var down = false, moved = false, startX = 0, startLeft = 0;
+
+    sc.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      down = true; moved = false;
+      startX = e.clientX; startLeft = sc.scrollLeft;
+    });
+
+    sc.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - startX;
+      // a few pixels of slop so a click on a link is still a click
+      if (!moved && Math.abs(dx) < 5) return;
+      if (!moved) { moved = true; sc.classList.add('is-dragging'); sc.setPointerCapture(e.pointerId); }
+      sc.scrollLeft = startLeft - dx;
+    });
+
+    function endDrag(e) {
+      if (!down) return;
+      down = false;
+      if (moved) {
+        sc.classList.remove('is-dragging');
+        try { sc.releasePointerCapture(e.pointerId); } catch (err) {}
+      }
+    }
+    sc.addEventListener('pointerup', endDrag);
+    sc.addEventListener('pointercancel', endDrag);
+    // swallow the click that follows a drag, so it never opens a Drive folder
+    sc.addEventListener('click', function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
+  });
 
   /* ============ 9 · cursor: instant ring + lagging label pill ============ */
   if (fine && !reduce) {

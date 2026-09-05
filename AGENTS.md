@@ -174,6 +174,19 @@ Three things that are easy to get wrong and are already handled — don't undo t
    `sweepPast()` catches those, and only runs after a jump bigger than one
    viewport, so ordinary scrolling costs nothing.
 
+**The custom smooth scroll swallows horizontal intent — mind this.** Section 1
+calls `preventDefault()` on every `wheel` event to drive its own lerp. That
+silently kills native horizontal scrolling in the `.sheet__scroll` strips: a
+laptop trackpad two-finger swipe produced *nothing*, and the work was only
+reachable with a mouse that had horizontal tilt or middle-click autoscroll. The
+handler now returns early when horizontal intent dominates (`|deltaX| > |deltaY|`
+or `shiftKey`) and the target is inside a strip.
+
+Vertical wheel over a strip is deliberately **not** captured — hijacking it to
+scroll sideways traps the reader in the section. Mouse-only users get drag and
+arrows instead (§8d). Any new scroll container needs the same exemption, or it
+will look broken on a laptop while working fine on a phone.
+
 **Hover is guarded.** Every hover rule that changes a transform or a fill lives
 inside `@media (hover:hover) and (pointer:fine)` — on touch, `:hover` latches
 after a tap and stays stuck. Coarse pointers get a `::before` overlay that lifts
