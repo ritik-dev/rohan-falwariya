@@ -39,6 +39,11 @@ Outputs:
 **Never edit `index.html` or anything in `dist/` by hand — they are generated.**
 Edit `src/page.html` and re-run the build.
 
+`assets/favicon.svg` is the tab icon: an Instrument Serif **R** in burnt sienna,
+stored as an outline `<path>` extracted from the woff2, so it needs no font at
+render time. `__FAVICON__` resolves to the file in index.html and to a base64
+data URI in dist/, keeping the single-file build self-contained.
+
 ## Deploy
 
 **Live: https://rohanmadeit.com** — continuous deployment, no manual step.

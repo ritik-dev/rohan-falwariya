@@ -13,7 +13,7 @@
  *                                (Rohan's deck PDF) and chats.md to anyone who guessed the URL.
  *
  * src/page.html holds <title>, <style>, markup and <script> with no document wrapper,
- * and two tokens:  __FONTFACE__  (the @font-face block)  ·  __BOARD__  (script-board image src)
+ * and two tokens:  __FONTFACE__  (the @font-face block)  ·  __FAVICON__  (tab icon href)
  *
  * Fonts are self-hosted — the page needs no network at all.
  */
@@ -86,6 +86,11 @@ for (const f of reelFiles.filter((f) => f.endsWith('.webp'))) {
 const inlinePosters = (html) =>
   html.replace(/assets\/reel\/([A-Za-z0-9_-]+\.webp)/g, (m, f) => reelPosters[f] || m);
 
+/* Tab icon: an Instrument Serif "R" stored as an outline path, so it needs no
+   font at render time. index.html links the file; dist/ inlines it, keeping the
+   single-file build working with no network at all. */
+const favData = `data:image/svg+xml;base64,${(await readFile(p('assets/favicon.svg'))).toString('base64')}`;
+
 const shell = (inner) => `<!doctype html>
 <html lang="en">
 <head>
@@ -95,8 +100,11 @@ ${inner}
 </html>
 `;
 
-const local  = body.replace('__FONTFACE__', await fontBlock(false));
-const inlined = inlineProof(inlinePosters(inlineWork(body.replace('__FONTFACE__', await fontBlock(true)))));
+const local  = body.replace('__FONTFACE__', await fontBlock(false))
+                   .replace('__FAVICON__', 'assets/favicon.svg');
+const inlined = inlineProof(inlinePosters(inlineWork(
+                  body.replace('__FONTFACE__', await fontBlock(true))
+                      .replace('__FAVICON__', favData))));
 
 await writeFile(p('index.html'), shell(local), 'utf8');
 await mkdir(p('dist'), { recursive: true });
@@ -118,6 +126,7 @@ for (const f of reelFiles) {
   await mkdir(p('_site/assets/reel'), { recursive: true });
   await copyFile(p('assets/reel', f), p('_site/assets/reel', f));
 }
+await copyFile(p('assets/favicon.svg'), p('_site/assets/favicon.svg'));
 let fontCount = 0;
 for (const f of await readdir(p('assets/fonts'))) {
   if (!f.endsWith('.woff2')) continue;
